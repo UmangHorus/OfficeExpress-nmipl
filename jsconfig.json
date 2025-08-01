@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@stores/*": ["./src/stores/*"]
+    },
+    "checkJs": false,
+    "allowJs": true,
+    "jsx": "preserve"
+  },
+  "exclude": ["node_modules"]
+}
