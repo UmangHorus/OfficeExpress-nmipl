@@ -19,6 +19,7 @@ import {
   UserRound,
   ListChecks,
   Bell,
+  Boxes,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -160,6 +161,16 @@ export default function DashboardSidebar({ onNavigate }) {
         ]
       : [];
 
+  // Add this to your navigation items configuration (before combining all navItems)
+  // const customBomItems = [
+  //   {
+  //     id: "custom-bom-management",
+  //     name: "Custom BOM Management",
+  //     href: "/custom-bom-management",
+  //     icon: <Boxes  className={ICON_SIZE} />, // Using ListChecks icon or choose another
+  //   },
+  // ];
+
   const navItems = isEmployee
     ? [
         ...baseNavItems,
@@ -167,6 +178,7 @@ export default function DashboardSidebar({ onNavigate }) {
         ...conditionalNavItems,
         ...followUpItems,
         ...reportItems,
+        // ...customBomItems, // Add the BOM item
       ]
     : [...baseNavItems, ...conditionalNavItemsForContacts];
 

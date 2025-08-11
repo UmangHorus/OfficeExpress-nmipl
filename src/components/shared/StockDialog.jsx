@@ -34,7 +34,7 @@ export const StockDialog = ({ open, setOpen, product }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="w-[90vw] max-w-[425px] md:w-full md:max-w-[600px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
         <DialogHeader>
           <DialogTitle>Stock Details</DialogTitle>
         </DialogHeader>

@@ -47,10 +47,11 @@ const PaymentTermsSelector = ({
   const displayTerm = orderIdParam
     ? salesOrderDetails?.payments_terms || selectedTerm
     : selectedTerm;
+  // Ensure displayDays is a string or empty string to avoid null
   const displayDays =
     orderIdParam && salesOrderDetails?.payments_terms == "F"
-      ? salesOrderDetails?.credit_days
-      : customDays;
+      ? salesOrderDetails?.credit_days?.toString() || ""
+      : customDays || "";
 
   // Find the label for the selected term
   const selectedOption = options.find((option) => option.value == displayTerm);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Clock, Lock, Maximize, Menu, Search, User } from "lucide-react";
+import { Bell, Clock, Lock, Maximize, Menu, Search, User, LogOut } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useRouter } from "next/navigation";
 import { useLoginStore } from "@/stores/auth.store";
@@ -42,12 +42,12 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
   const [isPunchOutDialogOpen, setIsPunchOutDialogOpen] = useState(false);
   const [isPunchOutConfirmOpen, setIsPunchOutConfirmOpen] = useState(false);
   const [punchOutBtn, setPunchOutBtn] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownTriggerRef = useRef(null);
   const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL_FALLBACK;
 
-  const { user = {}, appConfig = {} } = useLoginStore();
-  const { attrId, punchOut, employeePunchoutReset, resetAttendance } =
-    usePunchStore();
+  const { user = {}, appConfig = {}, token, logout } = useLoginStore();
+  const { attrId, punchOut, employeePunchoutReset, resetAttendance } = usePunchStore();
   const checkAndRequestLocation = useLocationPermission();
   const queryClient = useQueryClient();
   const userName = user?.name || user?.object_name;
@@ -89,6 +89,28 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
     setIsProfileDialogOpen(true);
   };
 
+  const handleLogout = async () => {
+    try {
+      logout();
+      const cookiesToClear = ["token", "isEmployee"];
+      cookiesToClear.forEach((cookieName) => {
+        document.cookie = `${cookieName}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${
+          process.env.NODE_ENV === "production" ? "; Secure" : ""
+        }`;
+      });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth-storage");
+        resetAttendance();
+      }
+      window.location.href = "/login";
+    } catch (error) {
+      toast.error("Logout failed: " + error.message, {
+        position: "top-right",
+        duration: 3000,
+      });
+    }
+  };
+
   const punchOutMutation = useMutation({
     mutationFn: async () => {
       return await punchService.employeePunchOut({
@@ -125,7 +147,7 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
   });
 
   const handlePunchOutClick = () => {
-    setIsDropdownOpen(false); // Close dropdown
+    setIsDropdownOpen(false);
     setIsPunchOutDialogOpen(true);
   };
 
@@ -205,6 +227,14 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
 
           {user?.isEmployee && <PunchSystem />}
           
+          <Button
+            className="flex items-center gap-1.5 bg-gray-500 hover:bg-gray-600 text-white font-medium py-1.5 px-2 rounded-md text-xs"
+            onClick={() => setShowLogoutConfirm(true)}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+
           {shouldShowDropdown ? (
             <DropdownMenu.Root
               open={isDropdownOpen}
@@ -288,7 +318,7 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
         open={isPunchOutDialogOpen}
         onOpenChange={setIsPunchOutDialogOpen}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[90vw] max-w-[425px] md:w-full md:max-w-[600px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
           <DialogHeader>
             <DialogTitle>Confirm Punch Out</DialogTitle>
             <DialogDescription>
@@ -315,7 +345,7 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
         open={isPunchOutConfirmOpen}
         onOpenChange={setIsPunchOutConfirmOpen}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[90vw] max-w-[425px] md:w-full md:max-w-[600px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
           <DialogHeader>
             <DialogTitle>Punch Out Confirmation</DialogTitle>
             <DialogDescription className="text-left">
@@ -335,6 +365,32 @@ export default function DashboardHeader({ toggleSidebar, sidebarVisible }) {
               className="bg-[#287f71] hover:bg-[#20665a] text-white text-xs py-1.5 px-2"
             >
               Confirm Punch Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <DialogContent className="w-[90vw] max-w-[425px] md:w-full md:max-w-[600px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
+          <DialogHeader>
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to log out of the system?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-gray-500 hover:bg-gray-600"
+              onClick={handleLogout}
+            >
+              Logout
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -66,6 +66,11 @@ const CreateOrderPage = () => {
     useState("salesorder-option");
   const [isSaveContact, setIsSaveContact] = useState(false); // New state for button disable
 
+  // Function to generate a unique ID (using timestamp for simplicity)
+  const generateUniqueId = () => {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  };
+
   // Initialize formValues
   const getInitialFormValues = (
     selectedtypeOption,
@@ -73,6 +78,7 @@ const CreateOrderPage = () => {
     selectedWonLead
   ) => {
     const baseFormValues = {
+      unique_id: generateUniqueId(), // Add unique_id
       productid: "",
       productname: "",
       // categoryname: "",
@@ -90,6 +96,8 @@ const CreateOrderPage = () => {
       unitvalue: "0",
       proddivision: "",
       stock_data: [],
+      Attribute_data: {},
+      attribute: {}, // Added attribute
       scheduleDate: format(new Date(), "yyyy-MM-dd"),
       discount: "",
       discount_amount: "",
@@ -109,6 +117,7 @@ const CreateOrderPage = () => {
     if (selectedWonLead?.products && selectedWonLead.products.length > 0) {
       const updatedFormValues = selectedWonLead.products.map((product) => {
         const baseProductValues = {
+          unique_id: product?.unique_id || generateUniqueId(), // Add unique_id
           productid: product.product_id || "",
           productname: product.productname || "",
           // categoryname: "",
@@ -126,6 +135,8 @@ const CreateOrderPage = () => {
           unitvalue: "0",
           proddivision: product.proddivision || "",
           stock_data: [],
+          Attribute_data: product.Attribute_data || {},
+          attribute: {}, // Added attribute
           scheduleDate: format(new Date(), "yyyy-MM-dd"),
           discount: "",
           discount_amount: "",
@@ -572,21 +583,28 @@ const CreateOrderPage = () => {
       await checkAndRequestLocation(`${ordersLabel} creation`);
 
       if (user?.isEmployee && !selectedContact) {
-        toast.error("Please select a contact to proceed");
+        toast.error("Please select a contact to proceed", {
+          duration: 2000,
+        });
         return;
       }
 
       // Check if contact is selected
       if (user?.isEmployee && !selectedContact?.mobile) {
         toast.error(
-          "The selected contact does not have a valid mobile number. OTP cannot be sent."
+          "The selected contact does not have a valid mobile number. OTP cannot be sent.",
+          {
+            duration: 2000,
+          }
         );
         return;
       }
 
       // Validate formValues for Select Products
       if (!formValues || formValues.length == 0) {
-        toast.error("Please select at least one product to proceed");
+        toast.error("Please select at least one product to proceed", {
+          duration: 2000,
+        });
         return;
       }
 
@@ -594,7 +612,12 @@ const CreateOrderPage = () => {
       for (const product of formValues) {
         if (!product.productid || product.productid == "") {
           toast.error(
-            `Please select a valid product for ${product.productname || "item"}`
+            `Please select a valid product for ${
+              product.productname || "item"
+            }`,
+            {
+              duration: 2000,
+            }
           );
           return;
         }
@@ -611,7 +634,10 @@ const CreateOrderPage = () => {
             toast.error(
               `Product ${
                 product.productname || "item"
-              }: Primary quantity must be greater than 0`
+              }: Primary quantity must be greater than 0`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
@@ -626,7 +652,10 @@ const CreateOrderPage = () => {
             toast.error(
               `Product ${
                 product.productname || "item"
-              }: Secondary quantity must be greater than 0`
+              }: Secondary quantity must be greater than 0`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
@@ -641,7 +670,10 @@ const CreateOrderPage = () => {
             toast.error(
               `Product ${
                 product.productname || "item"
-              }: Quantity must be greater than 0`
+              }: Quantity must be greater than 0`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
@@ -653,11 +685,15 @@ const CreateOrderPage = () => {
         if (!isSameAddress) {
           // If isSameAddress is not set, check billToAddress and shipToAddress
           if (!billToAddress) {
-            toast.error("Please select a bill to address");
+            toast.error("Please select a bill to address", {
+              duration: 2000,
+            });
             return;
           }
           if (!shipToAddress) {
-            toast.error("Please select a ship to address");
+            toast.error("Please select a ship to address", {
+              duration: 2000,
+            });
             return;
           }
         }
@@ -1229,6 +1265,7 @@ const CreateOrderPage = () => {
     setShowClickHere(false);
     setFormValues(() => {
       const baseFormValues = {
+        unique_id: generateUniqueId(), // Add unique_id
         productid: "",
         productname: "",
         // categoryname: "",
@@ -1246,6 +1283,8 @@ const CreateOrderPage = () => {
         unitvalue: "0",
         proddivision: "",
         stock_data: [],
+        Attribute_data: {},
+        attribute: {}, // Added attribute
         scheduleDate: format(new Date(), "yyyy-MM-dd"),
         discount: "",
         discount_amount: "",
@@ -1279,35 +1318,6 @@ const CreateOrderPage = () => {
       }
     });
   };
-
-  const pickupOptions = [
-    {
-      id: "store1",
-      name: "Horus Tech Solutions Pvt. Ltd",
-      address:
-        "Raja Palace 25 Ambicadevi Soc Part 2, T/0595/23/24 Delivery Note Opp Water Tank. Kiranpark, Nava Vadaj, Ahmedabad, GUJARAT, India",
-    },
-  ];
-
-  const selectProductsData = [
-    {
-      id: 1,
-      conversion: "",
-      category: "",
-      name: "",
-      products: "",
-      packing: "",
-      primary: "",
-      secondary: "",
-      stock: "",
-      mrp: "",
-      rate: "",
-      discountPercent: "",
-      discount: "",
-      total: "",
-      scheduleDate: "",
-    },
-  ];
 
   return (
     <div className="space-y-6">

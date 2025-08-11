@@ -6,7 +6,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* --font-sans: var(--font-geist-sans); */
-  --font-sans: "Roboto", sans-serif; 
+  --font-sans: "Roboto", sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -219,6 +219,62 @@
 
   .productsearch-table:not(.focused) > div {
     overflow: auto !important;
+  }
+
+  /* .listing-tables {
+    border: 0.5px solid #4a5a6b;
+  } */
+  .listing-tables tbody {
+    border: 0.5px solid #dbe0e5;
+    border-radius: 10px !important;
+  }
+
+  .listing-tables tbody tr {
+    border: 0.5px solid #dbe0e5;
+  }
+
+  .listing-tables thead tr th:first-child {
+    border-top-left-radius: 10px !important;
+  }
+
+  .listing-tables thead tr th:last-child {
+    border-top-right-radius: 10px !important;
+  }
+
+  .pagination-buttons button {
+    display: flex !important;
+    padding: 7px 12px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    border-radius: 6px !important;
+    border: 0.5px solid rgba(74, 90, 107, 0.9) !important;
+    background: #fff !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .pagination-buttons button:hover {
+    background-color: #287f71 !important;
+    color: #fff !important;
+    border-color: #287f71 !important;
+  }
+
+  .rows-per-page-container button {
+    border-radius: 6px !important;
+    border: 0.8px solid rgba(40, 127, 113, 0.8) !important;
+    background: #fff !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .rows-per-page-container button svg {
+    stroke-width: 1.333px !important;
+    stroke: #287f71 !important;
+    opacity: 1 !important;
+  }
+
+  .rows-per-page-container button:focus {
+    box-shadow: none !important;
+    border-color: #287f71 !important;
   }
 
   /* .donut-chart-dashboard .apexcharts-legend{

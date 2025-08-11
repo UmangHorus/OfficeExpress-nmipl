@@ -806,7 +806,7 @@ const AttendanceReport = () => {
             )}{" "}
             of {data.length} rows
           </div>
-          <div className="space-x-2 flex">
+          <div className="space-x-2 flex pagination-buttons">
             <Button
               variant="outline"
               size="sm"

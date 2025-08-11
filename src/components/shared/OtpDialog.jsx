@@ -100,9 +100,9 @@ export const OTPDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[90vw] max-w-[425px] md:w-full max-h-[90vh] overflow-y-auto overflow-x-hidden bg-white p-4 sm:p-6 rounded-lg">
         <DialogHeader>
-          <DialogTitle>Verify OTP</DialogTitle>
+          <DialogTitle className="text-center">Verify OTP</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center">
           <form onSubmit={handleSubmit}>

@@ -52,6 +52,7 @@ if (typeof window !== "undefined") {
     api.defaults.baseURL = url;
     // console.log("API initialized with URL:", url);
     console.log("API base URL set to:", url);
+    console.log("API window.location.hostname", window.location.hostname);
   });
 }
 

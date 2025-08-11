@@ -108,7 +108,7 @@ const OrderService = {
       selstate: addressData.selstate,
       zipcode: addressData.zipcode,
       billing_flg: "Y",
-      routes: addressData.routes
+      routes: addressData.routes,
     };
 
     const response = await api.post(
@@ -193,7 +193,7 @@ const OrderService = {
         if (orderData.location.address) {
           formData.append("gmapAddress", orderData.location.address);
         }
-      } 
+      }
       // If we got location data successfully
       else if (!locationPayload.error) {
         if (locationPayload.gmapurl) {
@@ -311,8 +311,11 @@ const OrderService = {
             "dd-MM-yyyy"
           );
 
+          // Create a new product object without Attribute_data
+          const { Attribute_data, ...productWithoutAttributes } = product;
+
           return {
-            ...product,
+            ...productWithoutAttributes,
             scheduleDate: formattedDate,
           };
         });
@@ -346,7 +349,7 @@ const OrderService = {
       // Get current location with proper error handling
       const locationPayload = await getLocationPayload();
 
-       // If we got an error from location, but have fallback location in orderData
+      // If we got an error from location, but have fallback location in orderData
       if (locationPayload.error && orderData.location) {
         if (orderData.location.gmapLink) {
           formData.append("gmapurl", orderData.location.gmapLink);
@@ -354,7 +357,7 @@ const OrderService = {
         if (orderData.location.address) {
           formData.append("gmapAddress", orderData.location.address);
         }
-      } 
+      }
       // If we got location data successfully
       else if (!locationPayload.error) {
         if (locationPayload.gmapurl) {
@@ -452,8 +455,11 @@ const OrderService = {
             "dd-MM-yyyy"
           );
 
+          // Create a new product object without Attribute_data
+          const { Attribute_data, ...productWithoutAttributes } = product;
+
           return {
-            ...product,
+            ...productWithoutAttributes,
             scheduleDate: formattedDate,
           };
         });

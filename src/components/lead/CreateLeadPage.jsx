@@ -97,11 +97,17 @@ const CreateLeadPage = () => {
   const [lastAddedLeadTitle, setLastAddedLeadTitle] = useState(""); // Track the last added lead title
   const [isSaveContact, setIsSaveContact] = useState(false); // New state for button disable
 
+  // Function to generate a unique ID (using timestamp for simplicity)
+  const generateUniqueId = () => {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  };
+
   // Initialize formValues
   const getInitialFormValues = (selectedtypeOption, secUnitConfig) => {
     // const selectedtypeOption = "salesorder-option"; // Hardcoded as per requirement
 
     const baseFormValues = {
+      unique_id: generateUniqueId(), // Add unique_id
       productid: "",
       productname: "",
       // categoryname: "",
@@ -119,6 +125,8 @@ const CreateLeadPage = () => {
       unitvalue: "0",
       proddivision: "",
       stock_data: [],
+      Attribute_data: {},
+      attribute: {}, // Added attribute
       scheduleDate: format(new Date(), "yyyy-MM-dd"),
       discount: "",
       discount_amount: "",
@@ -321,6 +329,7 @@ const CreateLeadPage = () => {
         setRemarks("");
         setFormValues([
           {
+            unique_id: generateUniqueId(), // Add unique_id
             productid: "",
             productname: "",
             // categoryname: "",
@@ -338,6 +347,8 @@ const CreateLeadPage = () => {
             unitvalue: "0",
             proddivision: "",
             stock_data: [],
+            Attribute_data: {},
+            attribute: {}, // Added attribute
             scheduleDate: format(new Date(), "yyyy-MM-dd"),
             discount: "",
             discount_amount: "",
@@ -388,32 +399,43 @@ const CreateLeadPage = () => {
 
       // Check if contact is selected
       if (user?.isEmployee && !selectedContact) {
-        toast.error("Please select a contact to proceed");
+        toast.error("Please select a contact to proceed", {
+          duration: 2000,
+        });
         return;
       }
 
       if (user?.isEmployee && !selectedContact?.mobile) {
         toast.error(
-          "The selected contact does not have a valid mobile number. OTP cannot be sent."
+          "The selected contact does not have a valid mobile number. OTP cannot be sent.",
+          {
+            duration: 2000,
+          }
         );
         return;
       }
 
       // Check if lead title is selected or provided
       if (enabledLeadTitle == "Y" && !selectedLeadTitle) {
-        toast.error(`Please select a ${leadLabel} title to proceed`);
+        toast.error(`Please select a ${leadLabel} title to proceed`, {
+          duration: 2000,
+        });
         return;
       }
 
       if (enabledLeadTitle != "Y" && !inputLeadTitleValue.trim()) {
-        toast.error(`Please enter a ${leadLabel} title to proceed`);
+        toast.error(`Please enter a ${leadLabel} title to proceed`, {
+          duration: 2000,
+        });
         return;
       }
 
       // Check for Upload Order Details tab
       if (activeTab == "Upload Order Details") {
         if (!singleFile) {
-          toast.error("Please upload a single file to proceed");
+          toast.error("Please upload a single file to proceed", {
+            duration: 2000,
+          });
           return;
         }
       }
@@ -421,7 +443,9 @@ const CreateLeadPage = () => {
       // Check for Upload by Products tab
       if (activeTab == "Upload by Products") {
         if (!editableProducts || editableProducts.length == 0) {
-          toast.error("Please add at least one product to proceed");
+          toast.error("Please add at least one product to proceed", {
+            duration: 2000,
+          });
           return;
         }
 
@@ -429,19 +453,27 @@ const CreateLeadPage = () => {
         for (const product of editableProducts) {
           if (!product.name) {
             toast.error(
-              `Product ID ${product.id}: Please provide a product name`
+              `Product ID ${product.id}: Please provide a product name`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
           if (!product.qty || Number(product.qty) <= 0) {
             // Modified check
             toast.error(
-              `Product ID ${product.id}: Quantity must be greater than 0`
+              `Product ID ${product.id}: Quantity must be greater than 0`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
           if (!product.unit) {
-            toast.error(`Product ID ${product.id}: Please provide a unit`);
+            toast.error(`Product ID ${product.id}: Please provide a unit`, {
+              duration: 2000,
+            });
             return;
           }
         }
@@ -450,7 +482,9 @@ const CreateLeadPage = () => {
       // Check for Select Products tab
       if (activeTab == "Select Products") {
         if (!formValues || formValues.length == 0) {
-          toast.error("Please select at least one product to proceed");
+          toast.error("Please select at least one product to proceed", {
+            duration: 2000,
+          });
           return;
         }
 
@@ -460,7 +494,10 @@ const CreateLeadPage = () => {
             toast.error(
               `Please select a valid product for ${
                 product.productname || "item"
-              }`
+              }`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
@@ -473,7 +510,10 @@ const CreateLeadPage = () => {
             toast.error(
               `Product ${
                 product.productname || "item"
-              }: Quantity must be greater than 0`
+              }: Quantity must be greater than 0`,
+              {
+                duration: 2000,
+              }
             );
             return;
           }
@@ -483,7 +523,9 @@ const CreateLeadPage = () => {
       // Check for Voice Note tab
       if (activeTab == "Voice Note") {
         if (!voiceNoteBlob) {
-          toast.error("Please provide a voice recording to proceed");
+          toast.error("Please provide a voice recording to proceed", {
+            duration: 2000,
+          });
           return;
         }
       }
@@ -850,6 +892,7 @@ const CreateLeadPage = () => {
       const selectedtypeOption = "lead-option";
 
       const baseFormValues = {
+        unique_id: generateUniqueId(), // Add unique_id
         productid: "",
         productname: "",
         // categoryname: "",
@@ -867,6 +910,8 @@ const CreateLeadPage = () => {
         unitvalue: "0",
         proddivision: "",
         stock_data: [],
+        Attribute_data: {},
+        attribute: {}, // Added attribute
         scheduleDate: format(new Date(), "yyyy-MM-dd"),
         discount: "",
         discount_amount: "",
@@ -1011,6 +1056,7 @@ const CreateLeadPage = () => {
       setEditableProducts([{ id: 1, name: "", qty: "", unit: "" }]);
       setFormValues([
         {
+          unique_id: generateUniqueId(), // Add unique_id
           productid: "",
           productname: "",
           // categoryname: "",
@@ -1028,6 +1074,8 @@ const CreateLeadPage = () => {
           unitvalue: "0",
           proddivision: "",
           stock_data: [],
+          Attribute_data: {},
+          attribute: {}, // Added attribute
           scheduleDate: format(new Date(), "yyyy-MM-dd"),
           discount: "",
           discount_amount: "",

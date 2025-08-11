@@ -622,7 +622,7 @@ const OrderTable = () => {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 pagination-responsive">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 rows-per-page-container">
             <span className="text-sm text-muted-foreground">
               Rows per page:
             </span>
@@ -631,6 +631,7 @@ const OrderTable = () => {
               onValueChange={(value) => {
                 table.setPageSize(Number(value));
               }}
+              
             >
               <SelectTrigger className="w-[70px] bg-white">
                 <SelectValue />
@@ -652,7 +653,7 @@ const OrderTable = () => {
             )}{" "}
             of {data.length} rows
           </div>
-          <div className="space-x-2 flex">
+          <div className="space-x-2 flex pagination-buttons">
             <Button
               variant="outline"
               size="sm"

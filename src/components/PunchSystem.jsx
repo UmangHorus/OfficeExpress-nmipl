@@ -10,15 +10,7 @@ import { punchService } from "@/lib/punchService";
 import { usePunchStore } from "@/stores/punch.store";
 import { useLoginStore } from "@/stores/auth.store";
 import useLocationPermission from "@/hooks/useLocationPermission";
-import { LogOut, Clock, Coffee, AlarmClock } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Coffee, AlarmClock, Clock } from "lucide-react";
 
 const PunchSystem = () => {
   const {
@@ -34,19 +26,16 @@ const PunchSystem = () => {
     setBreakOut,
     setAttrId,
     setBreakId,
-    resetAttendance,
-    employeePunchoutReset,
   } = usePunchStore();
 
   const checkAndRequestLocation = useLocationPermission();
   const queryClient = useQueryClient();
-  const { user, logout } = useLoginStore();
+  const { user } = useLoginStore();
   const loggedInUserId = user?.id;
 
   const [punchInBtn, setPunchInBtn] = useState(false);
   const [breakInBtn, setBreakInBtn] = useState(false);
   const [breakOutBtn, setBreakOutBtn] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const { refetch: getAttrID } = usePunchStatus(attrId);
 
@@ -176,28 +165,6 @@ const PunchSystem = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      logout();
-      const cookiesToClear = ["token", "isEmployee"];
-      cookiesToClear.forEach((cookieName) => {
-        document.cookie = `${cookieName}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax${
-          process.env.NODE_ENV === "production" ? "; Secure" : ""
-        }`;
-      });
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("auth-storage");
-        resetAttendance();
-      }
-      window.location.href = "/login";
-    } catch (error) {
-      toast.error("Logout failed: " + error.message, {
-        position: "top-right",
-        duration: 3000,
-      });
-    }
-  };
-
   return (
     <div className="flex flex-nowrap gap-1.5">
       {punchIn && (
@@ -239,40 +206,6 @@ const PunchSystem = () => {
           Break-Out
         </Button>
       )}
-
-      <Button
-        className="flex items-center gap-1.5 bg-gray-500 hover:bg-gray-600 text-white font-medium py-1.5 px-2 rounded-md text-xs"
-        onClick={() => setShowLogoutConfirm(true)}
-      >
-        <LogOut className="h-4 w-4" />
-        Logout
-      </Button>
-
-      {/* Logout Confirmation Dialog */}
-      <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Logout</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to log out of the system?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowLogoutConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-gray-500 hover:bg-gray-600"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

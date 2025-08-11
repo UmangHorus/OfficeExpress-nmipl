@@ -102,6 +102,22 @@ export const leadService = {
     return response.data;
   },
 
+  // New method to fetch product attributes
+  GetProductAttributes: async (token, productId) => {
+    const formData = new FormData();
+    formData.append("AUTHORIZEKEY", AUTHORIZE_KEY);
+    formData.append("PHPTOKEN", token);
+
+    // Only append if productId exists
+    if (productId) formData.append("product_id", productId);
+
+    const response = await api.post(
+      "/expo_access_api/getProductAttribute",
+      formData
+    );
+    return response.data;
+  },
+
   // Updated to use JSON instead of FormData
   getCompanyDetails: async () => {
     const payload = {
@@ -611,13 +627,17 @@ export const leadService = {
         }
       } else if (leadData.activeTab == "Select Products") {
         const modifiedMergedData = leadData.formValues.map((item) => {
-          const { secondary_base_qty, ...rest } = item;
+          // Remove Attribute_data (like in productWithoutAttributes logic)
+          const { Attribute_data, secondary_base_qty, ...rest } = item;
+
           return {
             ...rest,
             conv_fact: secondary_base_qty || "0",
           };
         });
+
         formData.append("products", JSON.stringify(modifiedMergedData));
+
         if (leadData.singleFile?.length > 0) {
           formData.append("bot_file_extra", leadData.singleFile[0]);
         }
