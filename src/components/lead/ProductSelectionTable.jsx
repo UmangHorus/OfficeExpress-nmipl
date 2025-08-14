@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Package, Plus, Tag, Trash2 } from "lucide-react";
+import { Eye, List, Plus, Tag, Trash2 } from "lucide-react";
 import { ProductSearch } from "@/components/inputs/search";
 import { toast } from "sonner";
 import { leadService } from "@/lib/leadService";
@@ -29,6 +29,7 @@ import { StockDialog } from "../shared/StockDialog";
 import useBasicSettingsStore from "@/stores/basicSettings.store";
 import useDateFormatter from "@/hooks/useDateFormatter";
 import ProdAttrDialog from "../shared/ProdAttrDialog";
+import { PriceListDialog } from "../shared/PriceListDialog";
 
 const ProductSelectionTable = ({
   formValues,
@@ -54,6 +55,7 @@ const ProductSelectionTable = ({
 
   const [isStockDialogOpen, setIsStockDialogOpen] = useState(false);
   const [isAttrModalOpen, setIsAttrModalOpen] = useState(false);
+  const [isPriceListModalOpen, setIsPriceListModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Function to generate a unique ID
@@ -69,6 +71,27 @@ const ProductSelectionTable = ({
   const handleShowAttributes = (product) => {
     setSelectedProduct(product);
     setIsAttrModalOpen(true);
+  };
+
+  const handleShowPriceList = (product) => {
+    setSelectedProduct(product);
+    setIsPriceListModalOpen(true);
+  };
+
+  const handlePriceListSave = (priceList) => {
+    const updatedFormValues = formValues.map((item) => {
+      if (item.unique_id == selectedProduct.unique_id) {
+        return {
+          ...item,
+          rate: priceList?.priceINR || item.rate,
+        };
+      }
+      return item;
+    });
+    setFormValues(updatedFormValues);
+    toast.success(`${priceList?.name || "Price list"} applied`, {
+      duration: 2000,
+    });
   };
 
   const getInitialFormValues = (
@@ -129,6 +152,7 @@ const ProductSelectionTable = ({
       productcode: product?.productcode || "",
       SecQtyReverseCalculate: product?.SecQtyReverseCalculate || "0",
       stock_data: product?.stock_data || [],
+      pricelist_data: product?.pricelist_data || {},
       Attribute_data: product?.Attribute_data || {},
       attribute: {},
       proddivision: product?.proddivision || "",
@@ -220,13 +244,7 @@ const ProductSelectionTable = ({
 
                     if (matchedMaster) {
                       initialAttributes[attrId] = matchedMaster.ID;
-                    } else {
-                      // If no match, use the first master's ID
-                      initialAttributes[attrId] = masters[0]?.ID || "";
                     }
-                  } else {
-                    // If no valueID, use the first master's ID
-                    initialAttributes[attrId] = masters[0]?.ID || "";
                   }
                 } else if (valueID) {
                   // For other types, use valueID if available
@@ -288,6 +306,7 @@ const ProductSelectionTable = ({
       productcode: "",
       SecQtyReverseCalculate: "0",
       stock_data: [],
+      pricelist_data: {},
       Attribute_data: {},
       attribute: {},
       proddivision: "",
@@ -365,6 +384,8 @@ const ProductSelectionTable = ({
         )
           ? productData?.stock_data
           : [];
+        newFormValues[index]["pricelist_data"] =
+          productData?.pricelist_data || {};
         newFormValues[index]["Attribute_data"] =
           productData?.Attribute_data || {};
         newFormValues[index]["attribute"] = {};
@@ -393,13 +414,7 @@ const ProductSelectionTable = ({
 
                   if (matchedMaster) {
                     initialAttributes[attrId] = matchedMaster.ID;
-                  } else {
-                    // If no match, use the first master's ID
-                    initialAttributes[attrId] = masters[0]?.ID || "";
                   }
-                } else {
-                  // If no ValueID, use the first master's ID
-                  initialAttributes[attrId] = masters[0]?.ID || "";
                 }
               } else if (attrData.ValueID) {
                 // For other types, use ValueID if available
@@ -428,7 +443,6 @@ const ProductSelectionTable = ({
           productData?.contact_default_discount
         );
         if (!isNaN(contactDefaultDiscount)) {
-          // Fixed: Added missing closing parenthesis
           newFormValues[index]["discount"] = contactDefaultDiscount.toString();
         } else {
           newFormValues[index]["discount"] = "";
@@ -778,6 +792,7 @@ const ProductSelectionTable = ({
       SecQtyReverseCalculate: "0",
       proddivision: "",
       stock_data: [],
+      pricelist_data: {},
       Attribute_data: {},
       attribute: {},
       scheduleDate: format(new Date(), "yyyy-MM-dd"),
@@ -849,6 +864,7 @@ const ProductSelectionTable = ({
         unitvalue: "0",
         SecQtyReverseCalculate: "0",
         stock_data: [],
+        pricelist_data: {},
         Attribute_data: {},
         attribute: {},
         proddivision: "",
@@ -910,6 +926,9 @@ const ProductSelectionTable = ({
                   Attr
                 </TableHead>
               )}
+               {/* <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
+                Price List
+              </TableHead> */}
               <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
                 Image
               </TableHead>
@@ -1031,6 +1050,34 @@ const ProductSelectionTable = ({
                     </div>
                   </TableCell>
                 )}
+                {/* <TableCell className="text-left">
+                  <div className="flex justify-center items-center">
+                    <List
+                      className={`${
+                        element.productid &&
+                        element.pricelist_data &&
+                        Object.keys(element.pricelist_data || {}).length > 0
+                          ? "text-[#26994e] cursor-pointer"
+                          : "text-gray-400 cursor-not-allowed opacity-50"
+                      }`}
+                      size={22}
+                      onClick={() => {
+                        if (
+                          element.productid &&
+                          element.pricelist_data &&
+                          Object.keys(element.pricelist_data || {}).length > 0
+                        ) {
+                          handleShowPriceList(element);
+                        }
+                      }}
+                      disabled={
+                        !element.productid ||
+                        !element.pricelist_data ||
+                        Object.keys(element.pricelist_data || {}).length === 0
+                      }
+                    />
+                  </div>
+                </TableCell> */}
                 <TableCell className="text-left">
                   <img
                     alt="product-image"
@@ -1600,6 +1647,37 @@ const ProductSelectionTable = ({
                     </div>
                   </div>
                 )}
+                {/* <div className="flex items-center">
+                  <label className="text-sm font-medium text-gray-500 w-32">
+                    Price List:
+                  </label>
+                  <div className="flex items-center">
+                    <List
+                      className={`${
+                        element.productid &&
+                        element.pricelist_data &&
+                        Object.keys(element.pricelist_data || {}).length > 0
+                          ? "text-[#26994e] cursor-pointer"
+                          : "text-gray-400 cursor-not-allowed opacity-50"
+                      }`}
+                      size={22}
+                      onClick={() => {
+                        if (
+                          element.productid &&
+                          element.pricelist_data &&
+                          Object.keys(element.pricelist_data || {}).length > 0
+                        ) {
+                          handleShowPriceList(element);
+                        }
+                      }}
+                      disabled={
+                        !element.productid ||
+                        !element.pricelist_data ||
+                        Object.keys(element.pricelist_data || {}).length === 0
+                      }
+                    />
+                  </div>
+                </div> */}
                 <div className="flex items-center">
                   <label className="text-sm font-medium text-gray-500 w-32">
                     Image:
@@ -2212,6 +2290,14 @@ const ProductSelectionTable = ({
         )}
         formValues={formValues}
         setFormValues={setFormValues}
+      />
+
+      {/* Price List Dialog */}
+      <PriceListDialog
+        open={isPriceListModalOpen}
+        setOpen={setIsPriceListModalOpen}
+        product={selectedProduct}
+        onSave={handlePriceListSave}
       />
     </div>
   );

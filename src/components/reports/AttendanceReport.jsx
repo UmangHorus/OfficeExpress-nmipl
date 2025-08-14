@@ -524,6 +524,7 @@ const AttendanceReport = () => {
       {
         accessorKey: "breakHours",
         header: ({ column }) => (
+          <>
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -532,6 +533,7 @@ const AttendanceReport = () => {
             Break Hours
             <ArrowUpDown className="h-4 w-4" />
           </Button>
+          </>
         ),
         cell: ({ row }) => <div>{row.getValue("breakHours")}</div>,
       },
@@ -775,8 +777,8 @@ const AttendanceReport = () => {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 pagination-responsive">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center">
+        <div className="flex items-center flex-col md:flex-row space-x-4">
+          <div className="flex items-center rows-per-page-container gap-2">
             <span className="text-sm text-muted-foreground">
               Rows per page:
             </span>
@@ -806,7 +808,7 @@ const AttendanceReport = () => {
             )}{" "}
             of {data.length} rows
           </div>
-          <div className="space-x-2 flex pagination-buttons">
+          <div className="flex pagination-buttons gap-2">
             <Button
               variant="outline"
               size="sm"

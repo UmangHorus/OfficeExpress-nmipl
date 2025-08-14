@@ -30,7 +30,7 @@ const ProdAttrDialog = ({
   const [attributes, setAttributes] = useState([]);
   const [localAttrValues, setLocalAttrValues] = useState({});
 
-  useEffect(() => {
+ useEffect(() => {
     if (product?.Attribute_data) {
       const attrArray = Object.values(product?.Attribute_data ?? {}).map(
         (attr) => ({
@@ -64,11 +64,7 @@ const ProdAttrDialog = ({
               );
               if (matchedMaster) {
                 defaultAttrs[attr?.ID] = matchedMaster?.ID;
-              } else {
-                defaultAttrs[attr?.ID] = attr?.Masters?.[0]?.ID ?? "";
               }
-            } else {
-              defaultAttrs[attr?.ID] = attr?.Masters?.[0]?.ID ?? "";
             }
           } else if (attr?.ValueID) {
             // For other types, use ValueID if available

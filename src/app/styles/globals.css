@@ -301,7 +301,7 @@
     width: auto;
   }
   .pagination-responsive,
-  .pagination-responsive div {
+  .pagination-responsive:first-child{
     text-align: center;
     display: block;
     margin-bottom: 0.5rem;

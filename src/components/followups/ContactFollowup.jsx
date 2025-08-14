@@ -998,8 +998,8 @@ const ContactFollowup = () => {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 pagination-responsive">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center">
+        <div className="flex flex-col md:flex-row items-center space-x-4">
+          <div className="flex items-center rows-per-page-container gap-2">
             <span className="text-sm text-muted-foreground">
               Rows per page:
             </span>
@@ -1029,7 +1029,7 @@ const ContactFollowup = () => {
             )}{" "}
             of {data.length} rows
           </div>
-          <div className="space-x-2 flex pagination-buttons">
+          <div className="flex pagination-buttons gap-2">
             <Button
               variant="outline"
               size="sm"
