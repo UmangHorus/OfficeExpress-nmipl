@@ -47,6 +47,22 @@ export const punchService = {
     return response.data;
   },
 
+  updateLoginLogoutTime: async (payload) => {
+    const response = await api.post(
+      "/expo_access_api/Updatelogin_logoutTime/",
+      {
+        AUTHORIZEKEY: AUTHORIZE_KEY,
+        ...payload,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  },
+
   getBreakOutIDByAttrID: async (att_id) => {
     const payload = {
       AUTHORIZEKEY: AUTHORIZE_KEY,

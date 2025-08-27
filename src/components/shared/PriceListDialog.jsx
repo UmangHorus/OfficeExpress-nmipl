@@ -22,7 +22,14 @@ import { toast } from "sonner";
 import { HashLoader } from "react-spinners";
 import { useSharedDataStore } from "@/stores/sharedData.store";
 
-export const PriceListDialog = ({ open, setOpen, product, onSave }) => {
+export const PriceListDialog = ({
+  open,
+  setOpen,
+  product,
+  selectedProductPriceList,
+  isSelectedProductPriceListLoading,
+  onSave,
+}) => {
   const { companyDetails } = useSharedDataStore();
   const [selectedPriceList, setSelectedPriceList] = useState("");
   const [priceLists, setPriceLists] = useState([]);
@@ -75,7 +82,12 @@ export const PriceListDialog = ({ open, setOpen, product, onSave }) => {
 
   // Transform API data to table format and return both data and headers
   const transformPriceListData = (pricelistData) => {
-    if (!pricelistData?.header || !pricelistData?.data) {
+    if (
+      !pricelistData ||
+      typeof pricelistData != "object" ||
+      !pricelistData.header ||
+      !pricelistData.data
+    ) {
       return { data: [], headers: [] };
     }
 
@@ -151,12 +163,12 @@ export const PriceListDialog = ({ open, setOpen, product, onSave }) => {
   };
 
   useEffect(() => {
-    if (open && product?.pricelist_data) {
+    if (open && selectedProductPriceList) {
       setIsLoading(true);
       try {
         // Transform the data and get both data and headers
         const { data: transformedData, headers: generatedHeaders } =
-          transformPriceListData(product.pricelist_data);
+          transformPriceListData(selectedProductPriceList);
 
         // Set both state variables
         setPriceLists(transformedData);
@@ -182,7 +194,7 @@ export const PriceListDialog = ({ open, setOpen, product, onSave }) => {
       setSelectedPriceList("");
       setActivePriceListId("");
     }
-  }, [open, product, companyDetails?.server_time]);
+  }, [open, selectedProductPriceList, companyDetails?.server_time]);
 
   const handleSave = () => {
     if (!selectedPriceList && !activePriceListId) {
@@ -250,10 +262,14 @@ export const PriceListDialog = ({ open, setOpen, product, onSave }) => {
           <DialogTitle>Select Price List</DialogTitle>
         </DialogHeader>
 
-        {isLoading ? (
+        {isSelectedProductPriceListLoading || isLoading ? (
           <div className="flex justify-center items-center py-8">
             <HashLoader color="#287f71" size={50} />
           </div>
+        ) : priceLists.length == 0 ? (
+          <p className="text-center py-4">
+            No price lists available for this product.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <RadioGroup

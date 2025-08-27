@@ -166,6 +166,38 @@ export const leadService = {
     return response.data;
   },
 
+  // Fetch product price list by product ID
+  getProductPriceList: async (token, productId) => {
+    try {
+      if (!token || !productId) {
+        throw new Error('Missing required parameters: token or productId');
+      }
+
+      const formData = new FormData();
+      formData.append("AUTHORIZEKEY", AUTHORIZE_KEY);
+      formData.append("PHPTOKEN", token);
+      formData.append("product_id", productId);
+
+      const response = await api.post(
+        `/expo_access_api/getProductPriceList1`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching product price list:', error);
+      return {
+        STATUS: 'ERROR',
+        MSG: error.response?.data?.message || 'Failed to fetch price list',
+      };
+    }
+  },
+
   // Fetch state list for a given country
   getStateList: async (country) => {
     const payload = {

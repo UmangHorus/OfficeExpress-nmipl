@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, ArrowUpDown, MapPin } from "lucide-react";
+import { ChevronDown, ArrowUpDown, MapPin, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
   useReactTable,
@@ -40,6 +40,7 @@ import { format, parse } from "date-fns";
 import { punchService } from "@/lib/punchService";
 import { useSharedDataStore } from "@/stores/sharedData.store";
 import OrderService from "@/lib/OrderService";
+import { EditLoginLogoutDialog } from "../shared/EditLoginLogoutDialog";
 
 const formatDateToDDMMYYYY = (dateStr) => {
   if (!dateStr) return "";
@@ -70,6 +71,7 @@ const AttendanceReport = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTrigger, setSearchTrigger] = useState(0);
   const isAdmin = appConfig?.main_admin_flg || "N";
+    // const isAdmin = appConfig?.isAdmin == 1 ? "Y" : "N" || "N";
   // 3. Update your searchParams state (if not already done)
   const [searchParams, setSearchParams] = useState({
     employeeId: loggedInUserId || "",
@@ -77,6 +79,8 @@ const AttendanceReport = () => {
     startDate: format(new Date(), "yyyy-MM-dd"),
     endDate: format(new Date(), "yyyy-MM-dd"),
   });
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [LoginLogoutdialogOpen, setLoginLogoutDialogOpen] = useState(false);
 
   // Fetch company, branch, and division data
   const {
@@ -366,6 +370,24 @@ const AttendanceReport = () => {
   const columns = useMemo(
     () => [
       {
+        id: "actions",
+        header: () => <div className="text-center text-white">Actions</div>,
+        cell: ({ row }) => {
+          return (
+            <div className="text-center flex justify-center gap-2">
+              <Pencil
+                className="h-5 w-5 text-[#D97706] hover:text-[#B45309] cursor-pointer"
+                onClick={() => {
+                  setSelectedRow(row.original);
+                  setLoginLogoutDialogOpen(true);
+                }}
+              />
+            </div>
+          );
+        },
+        enableHiding: false,
+      },
+      {
         accessorFn: (row) => ({
           PunchInAddress: row.punch_in_gmapAddress,
           PunchOutAddress: row.punch_out_gmapAddress,
@@ -525,14 +547,16 @@ const AttendanceReport = () => {
         accessorKey: "breakHours",
         header: ({ column }) => (
           <>
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-center w-full justify-center text-white hover:text-white hover:bg-[#4a5a6b]"
-          >
-            Break Hours
-            <ArrowUpDown className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+              className="text-center w-full justify-center text-white hover:text-white hover:bg-[#4a5a6b]"
+            >
+              Break Hours
+              <ArrowUpDown className="h-4 w-4" />
+            </Button>
           </>
         ),
         cell: ({ row }) => <div>{row.getValue("breakHours")}</div>,
@@ -610,241 +634,252 @@ const AttendanceReport = () => {
   });
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col gap-4 py-4">
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <div className="flex flex-col gap-1 w-full sm:w-48">
-            <label className="text-sm font-medium text-gray-700">
-              From Date
-            </label>
-            <Input
-              type="date"
-              value={startDateInput}
-              onChange={(e) => setStartDateInput(e.target.value)}
-              className="w-full bg-white"
-            />
-          </div>
-          <div className="flex flex-col gap-1 w-full sm:w-48">
-            <label className="text-sm font-medium text-gray-700">To Date</label>
-            <Input
-              type="date"
-              value={endDateInput}
-              onChange={(e) => setEndDateInput(e.target.value)}
-              className="w-full bg-white"
-            />
-          </div>
-          <div className="flex flex-col gap-1 w-full sm:w-48">
-            <label className="text-sm font-medium text-gray-700">
-              Employee
-            </label>
-            <Select
-              value={selectedUser?.value || "0"}
-              onValueChange={handleEmployeeChange}
-            >
-              <SelectTrigger className="w-full bg-white">
-                <SelectValue placeholder="Select Employee" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem key="all-employees" value="0">
-                  All Employees
-                </SelectItem>
-                {(companyConfigData?.employee || []).map((emp) => (
-                  <SelectItem key={emp.employee_id} value={emp.employee_id}>
-                    {emp.name}
+    <>
+      <div className="w-full">
+        <div className="flex flex-col gap-4 py-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <div className="flex flex-col gap-1 w-full sm:w-48">
+              <label className="text-sm font-medium text-gray-700">
+                From Date
+              </label>
+              <Input
+                type="date"
+                value={startDateInput}
+                onChange={(e) => setStartDateInput(e.target.value)}
+                className="w-full bg-white"
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-full sm:w-48">
+              <label className="text-sm font-medium text-gray-700">
+                To Date
+              </label>
+              <Input
+                type="date"
+                value={endDateInput}
+                onChange={(e) => setEndDateInput(e.target.value)}
+                className="w-full bg-white"
+              />
+            </div>
+            <div className="flex flex-col gap-1 w-full sm:w-48">
+              <label className="text-sm font-medium text-gray-700">
+                Employee
+              </label>
+              <Select
+                value={selectedUser?.value || "0"}
+                onValueChange={handleEmployeeChange}
+              >
+                <SelectTrigger className="w-full bg-white">
+                  <SelectValue placeholder="Select Employee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem key="all-employees" value="0">
+                    All Employees
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  {(companyConfigData?.employee || []).map((emp) => (
+                    <SelectItem key={emp.employee_id} value={emp.employee_id}>
+                      {emp.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-row justify-center gap-4">
-          <Button
-            onClick={handleDateSearch}
-            className="w-full sm:w-auto bg-[#287F71] hover:bg-[#1a5c4d]"
-            disabled={isRefetching}
-          >
-            Search
-          </Button>
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="w-full sm:w-auto"
-            disabled={isRefetching}
-          >
-            Reset
-          </Button>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          {/* <Input
+          <div className="flex flex-row justify-center gap-4">
+            <Button
+              onClick={handleDateSearch}
+              className="w-full sm:w-auto bg-[#287F71] hover:bg-[#1a5c4d]"
+              disabled={isRefetching}
+            >
+              Search
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={isRefetching}
+            >
+              Reset
+            </Button>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* <Input
             type="text"
             placeholder="Search attendance..."
             value={globalFilter || ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full sm:w-80 bg-white border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#287F71]"
           /> */}
-          <div className="flex flex-row sm:ml-auto gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto">
-                  Columns <ChevronDown className="ml-2 h-4 text-right w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              onClick={handleExportCSV}
-              className="w-full sm:w-auto bg-[#287F71] hover:bg-[#1a5c4d] text-white"
-            >
-              Export CSV
-            </Button>
+            <div className="flex flex-row sm:ml-auto gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Columns <ChevronDown className="ml-2 h-4 text-right w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {table
+                    .getAllColumns()
+                    .filter((column) => column.getCanHide())
+                    .map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                onClick={handleExportCSV}
+                className="w-full sm:w-auto bg-[#287F71] hover:bg-[#1a5c4d] text-white"
+              >
+                Export CSV
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="overflow-x-auto">
-        <Table className="min-w-full listing-tables">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="bg-[#4a5a6b] text-white text-center sm:text-sm text-base whitespace-nowrap"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="bg-[#fff] text-left">
-            {isLoading || isRefetching ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-10 text-center"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="text-center sm:text-sm text-base py-1 whitespace-nowrap"
+        <div className="overflow-x-auto">
+          <Table className="min-w-full listing-tables">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="bg-[#4a5a6b] text-white text-center sm:text-sm text-base whitespace-nowrap"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-10 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4 pagination-responsive">
-        <div className="flex items-center flex-col md:flex-row space-x-4">
-          <div className="flex items-center rows-per-page-container gap-2">
-            <span className="text-sm text-muted-foreground">
-              Rows per page:
-            </span>
-            <Select
-              value={pagination.pageSize.toString()}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value));
-              }}
-            >
-              <SelectTrigger className="w-[70px] bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[10, 25, 50, 75, 100].map((pageSize) => (
-                  <SelectItem key={pageSize} value={pageSize.toString()}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {pagination.pageIndex * pagination.pageSize + 1}-
-            {Math.min(
-              (pagination.pageIndex + 1) * pagination.pageSize,
-              data.length
-            )}{" "}
-            of {data.length} rows
-          </div>
-          <div className="flex pagination-buttons gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              First
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              Last
-            </Button>
+              ))}
+            </TableHeader>
+            <TableBody className="bg-[#fff] text-left">
+              {isLoading || isRefetching ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-10 text-center"
+                  >
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="text-center sm:text-sm text-base py-1 whitespace-nowrap"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-10 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4 pagination-responsive">
+          <div className="flex items-center flex-col md:flex-row space-x-4">
+            <div className="flex items-center rows-per-page-container gap-2">
+              <span className="text-sm text-muted-foreground">
+                Rows per page:
+              </span>
+              <Select
+                value={pagination.pageSize.toString()}
+                onValueChange={(value) => {
+                  table.setPageSize(Number(value));
+                }}
+              >
+                <SelectTrigger className="w-[70px] bg-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 75, 100].map((pageSize) => (
+                    <SelectItem key={pageSize} value={pageSize.toString()}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {pagination.pageIndex * pagination.pageSize + 1}-
+              {Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                data.length
+              )}{" "}
+              of {data.length} rows
+            </div>
+            <div className="flex pagination-buttons gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.setPageIndex(0)}
+                disabled={!table.getCanPreviousPage()}
+              >
+                First
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                disabled={!table.getCanNextPage()}
+              >
+                Last
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <EditLoginLogoutDialog
+        open={LoginLogoutdialogOpen}
+        setOpen={setLoginLogoutDialogOpen}
+        selectedRow={selectedRow}
+        searchParams={searchParams} // Add this prop
+      />
+    </>
   );
 };
 

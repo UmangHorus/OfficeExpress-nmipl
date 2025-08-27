@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -19,41 +18,54 @@ const PaymentTermsSelector = ({
   orderIdParam,
   salesOrderDetails,
 }) => {
-  // Auto-fill customDays with creditlimit_days when selectedTerm changes to "F"
+  const [hasManuallyChanged, setHasManuallyChanged] = useState(false);
+
+  // Reset manual change flag when selectedContact changes
   useEffect(() => {
-    if (selectedTerm == "F" && selectedContact?.creditlimit_days != null) {
-      // Only update if customDays hasn't been manually changed by the user
-      // or if customDays is empty/unchanged
-      if (!customDays || customDays == "") {
-        onChange({
-          term: selectedTerm,
-          days: selectedContact.creditlimit_days.toString(),
-        });
-      }
+    setHasManuallyChanged(false);
+  }, [selectedContact]);
+
+  // Auto-fill customDays with creditlimit_days when selectedTerm changes to "F"
+ useEffect(() => {
+  if (selectedTerm == "F") {
+    if (selectedContact?.creditlimit_days != null && !hasManuallyChanged) {
+      // Auto-fill with contact's credit days
+      onChange({
+        term: selectedTerm,
+        days: selectedContact.creditlimit_days.toString(),
+      });
+    } else if (!selectedContact?.creditlimit_days && !hasManuallyChanged) {
+      // Clear days if contact has no creditlimit_days
+      onChange({
+        term: selectedTerm,
+        days: "",
+      });
     }
-  }, [selectedTerm, selectedContact, customDays, onChange]);
+  }
+}, [selectedTerm, selectedContact, onChange, hasManuallyChanged]);
 
   const handleTermChange = (value) => {
-    // If switching away from "F", reset customDays to empty string
+    setHasManuallyChanged(false); // Reset when changing term
     const newDays = value == "F" ? customDays : "";
     onChange({ term: value, days: newDays });
   };
 
   const handleDaysChange = (e) => {
-    onChange({ term: selectedTerm, days: e.target.value });
+    if (!hasManuallyChanged) setHasManuallyChanged(true);
+    const value = e.target.value === "" ? "" : e.target.value.replace(/\D/g, "");
+    onChange({ term: selectedTerm, days: value });
   };
 
   // Determine the selected term and days based on orderIdParam
   const displayTerm = orderIdParam
     ? salesOrderDetails?.payments_terms || selectedTerm
-    : selectedTerm;
-  // Ensure displayDays is a string or empty string to avoid null
+    : selectedTerm || "F";
+
   const displayDays =
     orderIdParam && salesOrderDetails?.payments_terms == "F"
       ? salesOrderDetails?.credit_days?.toString() || ""
       : customDays || "";
 
-  // Find the label for the selected term
   const selectedOption = options.find((option) => option.value == displayTerm);
   const displayLabel = selectedOption ? selectedOption.label : "Select...";
 
@@ -100,6 +112,8 @@ const PaymentTermsSelector = ({
                 !!orderIdParam ? "bg-gray-100" : "bg-white"
               }`}
               disabled={!!orderIdParam}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
           </div>
         )}

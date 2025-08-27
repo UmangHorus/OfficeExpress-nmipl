@@ -1,5 +1,6 @@
 "use client";
 
+//gghgf
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import BranchSelector from "@/components/selectors/BranchSelector";
@@ -96,7 +97,8 @@ const CreateOrderPage = () => {
       unitvalue: "0",
       proddivision: "",
       stock_data: [],
-      pricelist_data: {},
+      // pricelist_data: {},
+      price_list_flg: false, // Added price_list_flg
       Attribute_data: {},
       attribute: {}, // Added attribute
       scheduleDate: format(new Date(), "yyyy-MM-dd"),
@@ -136,7 +138,8 @@ const CreateOrderPage = () => {
           unitvalue: "0",
           proddivision: product.proddivision || "",
           stock_data: [],
-          pricelist_data: product?.pricelist_data || {},
+          // pricelist_data: product?.pricelist_data || {},
+          price_list_flg: product?.price_list_flg || false, // Added price_list_flg
           Attribute_data: product.Attribute_data || {},
           attribute: {}, // Added attribute
           scheduleDate: format(new Date(), "yyyy-MM-dd"),
@@ -222,13 +225,13 @@ const CreateOrderPage = () => {
   const [isWonLeadModalOpen, setIsWonLeadModalOpen] = useState(false);
 
   // Delivery-related states
-  const [deliveryType, setDeliveryType] = useState("pickup");
+  const [deliveryType, setDeliveryType] = useState("delivery");
   const [billToAddress, setBillToAddress] = useState(null); // Stores address_id
   const [shipToAddress, setShipToAddress] = useState(null); // Stores address_id
   const [isSameAddress, setIsSameAddress] = useState(null); // Stores address_id if "same address" is
 
   // Payment-related states
-  const [selectedTerm, setSelectedTerm] = useState("");
+  const [selectedTerm, setSelectedTerm] = useState("F");
   const [customDays, setCustomDays] = useState("");
 
   // Payment options
@@ -262,6 +265,7 @@ const CreateOrderPage = () => {
       setWonLeadData([]);
       setSelectedWonLead(null);
       setCustomDays("");
+      setSelectedTerm("F");
     }
   }, [selectedContact]);
 
@@ -374,6 +378,28 @@ const CreateOrderPage = () => {
     }
   }, [salesOrderDetails, contactList, orderIdParam]);
 
+  useEffect(() => {
+    if (salesOrderDetails && orderIdParam) {
+      // Check if billing and shipping address IDs exist
+      if (salesOrderDetails.billing_address_id && salesOrderDetails.shipping_address_id) {
+        // Compare billing and shipping address IDs
+        const isSame = salesOrderDetails.billing_address_id == salesOrderDetails.shipping_address_id;
+
+        // If addresses are the same, set isSameAddress, billToAddress, and shipToAddress to the same ID
+        if (isSame) {
+          setIsSameAddress(salesOrderDetails.billing_address_id);
+          setBillToAddress(null);
+          setShipToAddress(null);
+        } else {
+          // If addresses are different, set billToAddress and shipToAddress to their respective IDs
+          setIsSameAddress(null); // or set to another value like "" or false, depending on your requirement
+          setBillToAddress(salesOrderDetails.billing_address_id);
+          setShipToAddress(salesOrderDetails.shipping_address_id);
+        }
+      }
+    }
+  }, [salesOrderDetails, orderIdParam]);
+
   // OTP state and create lead state start
   const [otpValue, setOtpValue] = useState("");
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
@@ -480,11 +506,11 @@ const CreateOrderPage = () => {
         setSelectedContact(null);
         setOtpValue("");
         setOtpKey("");
-        setDeliveryType("pickup");
+        setDeliveryType("delivery");
         setBillToAddress(null);
         setShipToAddress(null);
         setIsSameAddress(null);
-        setSelectedTerm("");
+        setSelectedTerm("F");
         setCustomDays("");
         setContactBillingAddresses([]);
         setSelectedWonLead(null);
@@ -553,11 +579,11 @@ const CreateOrderPage = () => {
         setSelectedContact(null);
         setOtpValue("");
         setOtpKey("");
-        setDeliveryType("pickup");
+        setDeliveryType("delivery");
         setBillToAddress(null);
         setShipToAddress(null);
         setIsSameAddress(null);
-        setSelectedTerm("");
+        setSelectedTerm("F");
         setCustomDays("");
         setContactBillingAddresses([]);
         setSelectedWonLead(null);
@@ -614,8 +640,7 @@ const CreateOrderPage = () => {
       for (const product of formValues) {
         if (!product.productid || product.productid == "") {
           toast.error(
-            `Please select a valid product for ${
-              product.productname || "item"
+            `Please select a valid product for ${product.productname || "item"
             }`,
             {
               duration: 2000,
@@ -634,8 +659,7 @@ const CreateOrderPage = () => {
             isNaN(Number(product.productqty))
           ) {
             toast.error(
-              `Product ${
-                product.productname || "item"
+              `Product ${product.productname || "item"
               }: Primary quantity must be greater than 0`,
               {
                 duration: 2000,
@@ -652,8 +676,7 @@ const CreateOrderPage = () => {
             isNaN(Number(product.SecQtyTotal))
           ) {
             toast.error(
-              `Product ${
-                product.productname || "item"
+              `Product ${product.productname || "item"
               }: Secondary quantity must be greater than 0`,
               {
                 duration: 2000,
@@ -670,8 +693,7 @@ const CreateOrderPage = () => {
             isNaN(Number(product.productqty))
           ) {
             toast.error(
-              `Product ${
-                product.productname || "item"
+              `Product ${product.productname || "item"
               }: Quantity must be greater than 0`,
               {
                 duration: 2000,
@@ -813,59 +835,59 @@ const CreateOrderPage = () => {
   });
 
   // Fetch contact data using useQuery
-   const {
-     data: contactData,
-     error: contactError,
-     isLoading: contactLoading,
-   } = useQuery({
-     queryKey: [
-       "contactList",
-       token,
-       orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
-     ],
-     queryFn: () =>
-       OrderService.getContactRawcontactAutoComplete(
-         token,
-         orderIdParam ? salesOrderDetails?.company_id : selectedCompany
-       ),
-     enabled:
-       !!token &&
-       (orderIdParam ? !!salesOrderDetails?.company_id : !!selectedCompany),
-     staleTime: 5 * 60 * 1000,
-     cacheTime: 10 * 60 * 1000,
-   });
- 
-   // Fetch product data
-   const {
-     data: productData,
-     error: productError,
-     isLoading: productLoading,
-   } = useQuery({
-     queryKey: [
-       "productList",
-       token,
-       orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
-       orderIdParam ? salesOrderDetails?.division_id : selectedDivision,
-       user?.id,
-     ],
-     queryFn: () =>
-       leadService.getProductBasedOnCompany(
-         token,
-         orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
-         orderIdParam ? salesOrderDetails?.division_id : selectedDivision,
-         user?.id // Passing employee ID
-       ),
-     enabled:
-       !!token &&
-       !!user?.id &&
-       (user?.isEmployee
-         ? !!(orderIdParam ? salesOrderDetails?.company_id : selectedCompany)
-         : true),
-     staleTime: 5 * 60 * 1000,
-     cacheTime: 10 * 60 * 1000,
-     retry: false,
-     refetchOnWindowFocus: false,
-   });
+  const {
+    data: contactData,
+    error: contactError,
+    isLoading: contactLoading,
+  } = useQuery({
+    queryKey: [
+      "contactList",
+      token,
+      orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
+    ],
+    queryFn: () =>
+      OrderService.getContactRawcontactAutoComplete(
+        token,
+        orderIdParam ? salesOrderDetails?.company_id : selectedCompany
+      ),
+    enabled:
+      !!token &&
+      (orderIdParam ? !!salesOrderDetails?.company_id : !!selectedCompany),
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
+
+  // Fetch product data
+  const {
+    data: productData,
+    error: productError,
+    isLoading: productLoading,
+  } = useQuery({
+    queryKey: [
+      "productList",
+      token,
+      orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
+      orderIdParam ? salesOrderDetails?.division_id : selectedDivision,
+      user?.id,
+    ],
+    queryFn: () =>
+      leadService.getProductBasedOnCompany(
+        token,
+        orderIdParam ? salesOrderDetails?.company_id : selectedCompany,
+        orderIdParam ? salesOrderDetails?.division_id : selectedDivision,
+        user?.id // Passing employee ID
+      ),
+    enabled:
+      !!token &&
+      !!user?.id &&
+      (user?.isEmployee
+        ? !!(orderIdParam ? salesOrderDetails?.company_id : selectedCompany)
+        : true),
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   // Fetch company details
   const {
@@ -891,13 +913,13 @@ const CreateOrderPage = () => {
       orderIdParam
         ? salesOrderDetails?.contact_id
         : user?.isEmployee
-        ? selectedContact?.id
-        : user?.id,
+          ? selectedContact?.id
+          : user?.id,
       orderIdParam
         ? salesOrderDetails?.contact_type
         : user?.isEmployee
-        ? selectedContact?.type
-        : user?.type,
+          ? selectedContact?.type
+          : user?.type,
       token,
     ],
     queryFn: () =>
@@ -906,21 +928,21 @@ const CreateOrderPage = () => {
         orderIdParam
           ? salesOrderDetails.contact_id
           : user?.isEmployee
-          ? selectedContact.id
-          : user.id,
+            ? selectedContact.id
+            : user.id,
         orderIdParam
           ? salesOrderDetails.contact_type
           : user?.isEmployee
-          ? selectedContact.type
-          : user.type
+            ? selectedContact.type
+            : user.type
       ),
     enabled:
       !!token &&
       (orderIdParam
         ? !!salesOrderDetails?.contact_id && !!salesOrderDetails?.contact_type
         : user?.isEmployee
-        ? !!selectedContact?.id && !!selectedContact?.type
-        : !!user?.id && !!user?.type),
+          ? !!selectedContact?.id && !!selectedContact?.type
+          : !!user?.id && !!user?.type),
     staleTime: 0,
     cacheTime: 0,
     refetchOnMount: "always",
@@ -1074,7 +1096,7 @@ const CreateOrderPage = () => {
 
   useEffect(() => {
     if (user?.isEmployee && !selectedContact) {
-      setDeliveryType("pickup");
+      setDeliveryType("delivery");
       setBillToAddress(null);
       setShipToAddress(null);
       setIsSameAddress(null);
@@ -1298,7 +1320,8 @@ const CreateOrderPage = () => {
         unitvalue: "0",
         proddivision: "",
         stock_data: [],
-        pricelist_data: {},
+        // pricelist_data: {},
+        price_list_flg: false, // Added price_list_flg
         Attribute_data: {},
         attribute: {}, // Added attribute
         scheduleDate: format(new Date(), "yyyy-MM-dd"),
@@ -1471,7 +1494,7 @@ const CreateOrderPage = () => {
                   orderIdParam={orderIdParam}
                   salesOrderDetails={salesOrderDetails}
                 />
-                {deliveryType == "delivery" && (
+                {deliveryType == "delivery" && selectedContact && !orderIdParam && (
                   <div className="mt-4">
                     <Button
                       className="h-9 px-4 bg-[#287f71] hover:bg-[#20665a] text-white"
@@ -1549,13 +1572,13 @@ const CreateOrderPage = () => {
         disabled={
           orderIdParam
             ? user?.isEmployee && enabledOtpPortal == 0
-              ? saveOrderMutation.isPending
+              ? saveEditOrderMutation.isPending
               : generateOtpMutation.isPending
             : user?.isEmployee
-            ? enabledOtpPortal == 0
-              ? saveOrderMutation.isPending
-              : generateOtpMutation.isPending
-            : saveOrderMutation.isPending
+              ? enabledOtpPortal == 0
+                ? saveOrderMutation.isPending
+                : generateOtpMutation.isPending
+              : saveOrderMutation.isPending
         }
         onClick={handleCreateOrder}
       >

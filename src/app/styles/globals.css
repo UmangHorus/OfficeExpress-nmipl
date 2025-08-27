@@ -276,6 +276,10 @@
     box-shadow: none !important;
     border-color: #287f71 !important;
   }
+  
+  .loginlogout-datepicker-div .react-datepicker-wrapper{
+    width: 100% !important;
+  }
 
   /* .donut-chart-dashboard .apexcharts-legend{
     height: auto !important;
