@@ -39,6 +39,7 @@ import {
   UserPlus,
   ShoppingCart,
   Pencil,
+  Ruler,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -138,7 +139,7 @@ const ContactList = () => {
             const isVisitorOut =
               responseData?.visitor_found[0]?.reference_id == item.contact_id &&
               responseData?.visitor_found[0]?.reference_type ==
-                mappedContactType;
+              mappedContactType;
             const routes =
               item.route_values?.length > 0
                 ? item.route_values.map((route) => route.RouteMaster.route_name)
@@ -256,8 +257,8 @@ const ContactList = () => {
         visitor.reference_type == "1"
           ? "C"
           : visitor.reference_type == "6"
-          ? "RC"
-          : null;
+            ? "RC"
+            : null;
 
       if (contactType) {
         const found = data.find(
@@ -297,9 +298,9 @@ const ContactList = () => {
       const responseData = Array.isArray(response) ? response[0] : response;
       if (responseData?.STATUS === "SUCCESS") {
         setIsContactDialogOpen(false);
-        toast.success("Contact added successfully!",{
-            duration: 2000,
-          });
+        toast.success("Contact added successfully!", {
+          duration: 2000,
+        });
         refetchContacts();
       } else {
         throw new Error(responseData?.MSG || "Failed to add contact");
@@ -362,9 +363,9 @@ const ContactList = () => {
       if (responseData?.STATUS === "SUCCESS") {
         setIsContactDialogOpen(false);
         setEditContact(null);
-        toast.success("Contact updated successfully!",{
-            duration: 2000,
-          });
+        toast.success("Contact updated successfully!", {
+          duration: 2000,
+        });
         refetchContacts();
       } else {
         throw new Error(responseData?.MSG || "Failed to update contact");
@@ -537,7 +538,7 @@ const ContactList = () => {
       contact_type: type,
       ev_id: visitorFound[0]?.ev_id || "",
     });
-    router.replace(`/leads/create?${queryParams.toString()}`); // 👈 Replaces URL
+    router.push(`/leads/create?${queryParams.toString()}`); // 👈 Replaces URL
   };
 
   const handleAddOrder = (id, type) => {
@@ -547,7 +548,16 @@ const ContactList = () => {
       contact_type: type,
       ev_id: visitorFound[0]?.ev_id || "",
     });
-    router.replace(`/orders/create?${queryParams.toString()}`); // 👈 Replaces URL
+    router.push(`/orders/create?${queryParams.toString()}`); // 👈 Replaces URL
+  };
+
+  const handleAddMeasurement = (id, type) => {
+    const queryParams = new URLSearchParams({
+      contact_id: id,
+      contact_type: type,
+      ev_id: visitorFound[0]?.ev_id || "",
+    });
+    router.push(`/measurements/add?${queryParams.toString()}`);  // 👈 Replaces URL
   };
 
   const handleVisitIn = async (id, contactType) => {
@@ -568,9 +578,9 @@ const ContactList = () => {
       const result = response[0] || {};
       if (result.STATUS === "SUCCESS") {
         await refetchContacts();
-        toast.success("Visit In recorded successfully.",{
-            duration: 2000,
-          });
+        toast.success("Visit In recorded successfully.", {
+          duration: 2000,
+        });
       } else {
         toast.error(result.MSG || "Failed to record Visit In.");
       }
@@ -625,6 +635,9 @@ const ContactList = () => {
       case "order":
         handleAddOrder(id, contactType);
         break;
+      case "measurement":
+        handleAddMeasurement(id, contactType);
+        break;
       default:
         toast.error("Please select an action.");
         return;
@@ -668,7 +681,7 @@ const ContactList = () => {
         const visitorResult = visitorResponse[0] || {};
         if (visitorResult.STATUS === "SUCCESS") {
           await refetchContacts();
-          toast.success("Follow-up added and Visit Out recorded successfully.",{
+          toast.success("Follow-up added and Visit Out recorded successfully.", {
             duration: 2000,
           });
           setIsFollowupDialogOpen(false);
@@ -727,11 +740,10 @@ const ContactList = () => {
             <Button
               variant="default"
               size="sm"
-              className={`mx-auto text-white w-full px-1 ${
-                lead.ev_id
-                  ? "bg-[#4a5a6b] hover:bg-[#5c6b7a]"
-                  : "bg-[#287f71] hover:bg-[#20665a]"
-              }`}
+              className={`mx-auto text-white w-full px-1 ${lead.ev_id
+                ? "bg-[#4a5a6b] hover:bg-[#5c6b7a]"
+                : "bg-[#287f71] hover:bg-[#20665a]"
+                }`}
               onClick={() => handleVisitIn(lead.id, lead.contact_type)}
               disabled={disabledVisitIn || isVisitorMismatch}
             >
@@ -755,7 +767,7 @@ const ContactList = () => {
                   size="sm"
                   disabled={true}
                   title="No location available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed "
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -772,7 +784,7 @@ const ContactList = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#287f71] hover:text-[#1a5c4d]"
+                    className="text-[#287f71] hover:text-[#1a5c4d] "
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -1025,12 +1037,14 @@ const ContactList = () => {
       {visitorFound.length > 0 && (
         <div className="mb-4 p-3 bg-yellow-100 border-l-4 border-yellow-500">
           <p className="font-bold text-yellow-700">
-            {matchedVisitor ? (
+            {visitorFound[0].reference_name ? (
               <>
                 Visit status: <span className="">Pending check-out</span> for{" "}
-                <span className="underline">{matchedVisitor.name}</span>
-                {matchedVisitor.mobile && (
-                  <>, Mobile: {matchedVisitor.mobile}</>
+                <span className="underline">{visitorFound[0].reference_name}</span>
+                {" "}(
+                {visitorFound[0].reference_type == "1" ? "C" : "RC"})
+                {visitorFound[0].reference_mobile_no && (
+                  <>, Mobile: {visitorFound[0].reference_mobile_no}</>
                 )}
               </>
             ) : (
@@ -1040,7 +1054,7 @@ const ContactList = () => {
                   Reference ID: {visitorFound[0].reference_id}
                 </span>
                 (Type:{" "}
-                {visitorFound[0].reference_type == "1" ? "Customer" : "RC"})
+                {visitorFound[0].reference_type == "1" ? "C" : "RC"})
               </>
             )}
           </p>
@@ -1060,7 +1074,7 @@ const ContactList = () => {
             <Select
               value={selectedRoute}
               onValueChange={setSelectedRoute}
-              // disabled={routeLoading || routeError}
+            // disabled={routeLoading || routeError}
             >
               <SelectTrigger className="w-full sm:w-[200px] bg-[#fff]">
                 <SelectValue placeholder="Select Route" />
@@ -1139,9 +1153,9 @@ const ContactList = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -1207,13 +1221,21 @@ const ContactList = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm text-muted-foreground">
+          {/* <div className="text-sm text-muted-foreground">
             {pagination.pageIndex * pagination.pageSize + 1}-
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
               filteredData.length
             )}{" "}
             of {filteredData.length} rows
+          </div> */}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length === 0
+              ? "0-0 of 0 rows"
+              : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )} of ${table.getFilteredRowModel().rows.length} rows`}
           </div>
           <div className="flex pagination-buttons gap-2">
             <Button
@@ -1267,7 +1289,7 @@ const ContactList = () => {
         open={isVisitOutDialogOpen}
         onOpenChange={setIsVisitOutDialogOpen}
       >
-        <DialogContent className="w-[90vw] max-w-[425px] md:w-full md:max-w-[600px] lg:max-w-[800px] max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
+        <DialogContent className="w-[90vw] max-w-[425px] md:w-full  max-h-[90vh] overflow-y-auto bg-white p-4 sm:p-6 rounded-lg">
           <DialogHeader>
             <DialogTitle>Select Post Visit Action</DialogTitle>
           </DialogHeader>
@@ -1342,10 +1364,33 @@ const ContactList = () => {
                   </div>
                 </Label>
               </div>
+
+              {/* <div className="flex items-center space-x-3">
+                <RadioGroupItem
+                  value="measurement"
+                  id="measurement"
+                  className="text-white data-[state=checked]:border-[#287f71] [&[data-state=checked]>span>svg]:fill-[#287f71] h-5 w-5"
+                />
+                <Label
+                  htmlFor="measurement"
+                  className="flex items-center gap-2 font-normal cursor-pointer"
+                >
+                  <div className="p-2 rounded-lg bg-[#287f71]/10 text-[#287f71]">
+                    <Ruler className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Add Measurement</p>
+                    <p className="text-sm text-muted-foreground">
+                      Record a new measurement
+                    </p>
+                  </div>
+                </Label>
+              </div> */}
             </RadioGroup>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex justify-end gap-4 flex-row">
             <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 setIsVisitOutDialogOpen(false);
@@ -1356,9 +1401,10 @@ const ContactList = () => {
               Cancel
             </Button>
             <Button
-              onClick={handleVisitOutAction}
+              type="submit"
+              className="bg-[#287f71] hover:bg-[#20665a] text-white text-sm sm:text-base"
               disabled={!visitOutAction}
-              className="bg-[#287f71] hover:bg-[#20665a]"
+              onClick={handleVisitOutAction}
             >
               Confirm
             </Button>
@@ -1389,7 +1435,7 @@ const ContactList = () => {
         />
       </Modal>
 
-      
+
     </div>
   );
 };

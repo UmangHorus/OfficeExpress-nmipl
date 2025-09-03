@@ -117,7 +117,7 @@ const LeadTable = () => {
               createdate: order.lead_dt || "",
               visitStatus:
                 responseData?.DATA?.visitor_found[0]?.reference_id ==
-                order.order_no
+                  order.order_no
                   ? "out"
                   : null,
               leadstatus: mapStatus(order.status),
@@ -167,8 +167,8 @@ const LeadTable = () => {
       if (result.STATUS === "SUCCESS") {
         await refetchLeads();
         toast.success("Visit In recorded successfully.", {
-              duration: 2000,
-            });
+          duration: 2000,
+        });
       } else {
         toast.error(result.MSG || "Failed to record Visit In.");
       }
@@ -248,8 +248,8 @@ const LeadTable = () => {
         if (visitorResult.STATUS === "SUCCESS") {
           await refetchLeads();
           toast.success("Followup and Visit Out recorded successfully.", {
-              duration: 2000,
-            });
+            duration: 2000,
+          });
           setIsFollowupDialogOpen(false);
           setSelectedLead(null);
         } else {
@@ -276,55 +276,54 @@ const LeadTable = () => {
       ...(!user?.isEmployee
         ? []
         : [
-            {
-              id: "visit",
-              header: () => <div className="text-center text-white">Visit</div>,
-              cell: ({ row }) => {
-                const lead = row.original || {};
-                if (lead.visitStatus === "out") {
-                  return (
-                    <div className="text-center">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="bg-orange-600 hover:bg-orange-700 mx-auto"
-                        onClick={() => handleVisitOut(lead, "out")}
-                        disabled={
-                          disabledVisitOut ||
-                          (visitorFound.length > 0 &&
-                            lead.id != visitorFound[0]?.reference_id)
-                        }
-                      >
-                        Visit Out
-                      </Button>
-                    </div>
-                  );
-                }
+          {
+            id: "visit",
+            header: () => <div className="text-center text-white">Visit</div>,
+            cell: ({ row }) => {
+              const lead = row.original || {};
+              if (lead.visitStatus === "out") {
                 return (
                   <div className="text-center">
                     <Button
                       variant="default"
                       size="sm"
-                      className={`mx-auto text-white ${
-                        lead.ev_id
-                          ? "bg-[#4a5a6b] hover:bg-[#5c6b7a]"
-                          : "bg-[#287f71] hover:bg-[#20665a]"
-                      }`}
-                      onClick={() => handleVisitIn(lead, "in")}
+                      className="bg-orange-600 hover:bg-orange-700 mx-auto"
+                      onClick={() => handleVisitOut(lead, "out")}
                       disabled={
-                        disabledVisitIn ||
+                        disabledVisitOut ||
                         (visitorFound.length > 0 &&
                           lead.id != visitorFound[0]?.reference_id)
                       }
                     >
-                      Visit In
+                      Visit Out
                     </Button>
                   </div>
                 );
-              },
-              enableHiding: false,
+              }
+              return (
+                <div className="text-center">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className={`mx-auto text-white ${lead.ev_id
+                        ? "bg-[#4a5a6b] hover:bg-[#5c6b7a]"
+                        : "bg-[#287f71] hover:bg-[#20665a]"
+                      }`}
+                    onClick={() => handleVisitIn(lead, "in")}
+                    disabled={
+                      disabledVisitIn ||
+                      (visitorFound.length > 0 &&
+                        lead.id != visitorFound[0]?.reference_id)
+                    }
+                  >
+                    Visit In
+                  </Button>
+                </div>
+              );
             },
-          ]),
+            enableHiding: false,
+          },
+        ]),
       {
         accessorFn: (row) => ({
           CustomerAddress: row.customer_address,
@@ -347,7 +346,7 @@ const LeadTable = () => {
                   size="sm"
                   disabled={true}
                   title="No contact address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -364,7 +363,7 @@ const LeadTable = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#287F71] hover:text-[#1a5c4d]"
+                    className="text-[#287F71] hover:text-[#1a5c4d] pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -376,7 +375,7 @@ const LeadTable = () => {
                   size="sm"
                   disabled={true}
                   title="No followup address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -393,7 +392,7 @@ const LeadTable = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="created-address-icon"
+                    className="created-address-icon pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -727,9 +726,9 @@ const LeadTable = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -795,13 +794,21 @@ const LeadTable = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm text-muted-foreground">
+          {/* <div className="text-sm text-muted-foreground">
             {pagination.pageIndex * pagination.pageSize + 1}-
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
               data.length
             )}{" "}
             of {data.length} rows
+          </div> */}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length === 0
+              ? "0-0 of 0 rows"
+              : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )} of ${table.getFilteredRowModel().rows.length} rows`}
           </div>
           <div className="flex pagination-buttons gap-2">
             <Button

@@ -87,7 +87,7 @@ export const TimelineLayout = () => {
       formData.append("AUTHORIZEKEY", AUTHORIZE_KEY);
       formData.append("PHPTOKEN", token);
       formData.append("employee_id", employeeId);
-      formData.append("employee_id", selectedEmployee);
+      // formData.append("employee_id", selectedEmployee);
       formData.append("activity_date", formattedDate);
 
       const response = await api.post(

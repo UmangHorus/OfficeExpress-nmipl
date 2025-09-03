@@ -69,8 +69,12 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
           (parseFloat(item.SecQtyTotal || "0") * parseFloat(item.rate || "0")) /
           parseFloat(item.secondary_base_qty || "1");
       } else if (item.unit_con_mode == "3" && item.conversion_flg == "2") {
+        // use rate instead of sec_unit_rate as per new requirement for sales order details page
+        // baseAmount =
+        //   parseFloat(item.SecQtyTotal || "0") * parseFloat(item.sec_unit_rate || "0");
+
         baseAmount =
-          parseFloat(item.SecQtyTotal || "0") * parseFloat(item.sec_unit_rate || "0");
+          parseFloat(item.SecQtyTotal || "0") * parseFloat(item.rate || "0");
       } else {
         baseAmount = parseFloat(item.productqty || "0") * parseFloat(item.rate || "0");
       }
@@ -78,6 +82,31 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
       baseAmount = parseFloat(item.productqty || "0") * parseFloat(item.rate || "0");
     }
     return baseAmount * (parseFloat(item.total_discount || "0") / 100);
+  };
+
+  const calculateSalesOrderBaseAmount = (item) => {
+    let baseAmount = 0;
+    if (item?.conversion_flg != "") {
+      if (item.unit_con_mode == "1" && item.conversion_flg == "1") {
+        baseAmount = parseFloat(item.productqty || "0") * parseFloat(item.rate || "0");
+      } else if (item.unit_con_mode == "1" && item.conversion_flg == "2") {
+        baseAmount =
+          (parseFloat(item.SecQtyTotal || "0") * parseFloat(item.rate || "0")) /
+          parseFloat(item.secondary_base_qty || "1");
+      } else if (item.unit_con_mode == "3" && item.conversion_flg == "2") {
+        // use rate instead of sec_unit_rate as per new requirement for sales order details page
+        // baseAmount =
+        //   parseFloat(item.SecQtyTotal || "0") * parseFloat(item.sec_unit_rate || "0");
+
+        baseAmount =
+          parseFloat(item.SecQtyTotal || "0") * parseFloat(item.rate || "0");
+      } else {
+        baseAmount = parseFloat(item.productqty || "0") * parseFloat(item.rate || "0");
+      }
+    } else {
+      baseAmount = parseFloat(item.productqty || "0") * parseFloat(item.rate || "0");
+    }
+    return baseAmount;
   };
 
   const products = salesOrderDetails?.Products || [];
@@ -88,7 +117,7 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
     : 0;
 
   const subtotal = Array.isArray(products)
-    ? products.reduce((sum, item) => sum + parseFloat(item.totalrate || "0"), 0)
+    ? products.reduce((sum, item) => sum + calculateSalesOrderBaseAmount(item), 0)
     : 0;
 
   const totalDiscount = Array.isArray(products)
@@ -97,9 +126,9 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
 
   const totalCharges = Array.isArray(saleProductCharges)
     ? saleProductCharges.reduce(
-        (sum, charge) => sum + parseFloat(charge.so_chrg_tax_amount || "0"),
-        0
-      )
+      (sum, charge) => sum + parseFloat(charge.so_chrg_tax_amount || "0"),
+      0
+    )
     : 0;
 
   const netAmount = (subtotal - totalDiscount).toFixed(2);
@@ -268,13 +297,12 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
           <div className="flex justify-between items-center mt-4 mx-0 sm:mx-16">
             <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${
-                  Number(salesOrderDetails?.OrderStatus) == 1
-                    ? "bg-yellow-100 border-b-4 border-blue-500"
-                    : Number(salesOrderDetails?.OrderStatus) < 1
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${Number(salesOrderDetails?.OrderStatus) == 1
+                  ? "bg-yellow-100 border-b-4 border-blue-500"
+                  : Number(salesOrderDetails?.OrderStatus) < 1
                     ? "border-gray-300"
                     : "bg-blue-100"
-                }`}
+                  }`}
               >
                 <img
                   src={`${baseurl}/public/images/orderbot/order_received.png`}
@@ -284,21 +312,19 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
               </div>
             </div>
             <div
-              className={`flex-1 h-1 sm:mx-2 ${
-                Number(salesOrderDetails?.OrderStatus) <= 1
-                  ? "border-dashed border-gray-300"
-                  : "bg-blue-200"
-              }`}
+              className={`flex-1 h-1 sm:mx-2 ${Number(salesOrderDetails?.OrderStatus) <= 1
+                ? "border-dashed border-gray-300"
+                : "bg-blue-200"
+                }`}
             ></div>
             <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${
-                  Number(salesOrderDetails?.OrderStatus) == 2
-                    ? "bg-yellow-100 border-b-4 border-blue-500"
-                    : Number(salesOrderDetails?.OrderStatus) < 2
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${Number(salesOrderDetails?.OrderStatus) == 2
+                  ? "bg-yellow-100 border-b-4 border-blue-500"
+                  : Number(salesOrderDetails?.OrderStatus) < 2
                     ? "border-gray-300"
                     : "bg-blue-100"
-                }`}
+                  }`}
               >
                 <img
                   src={`${baseurl}/public/images/orderbot/order_accepted.png`}
@@ -308,21 +334,19 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
               </div>
             </div>
             <div
-              className={`flex-1 h-1 sm:mx-2 ${
-                Number(salesOrderDetails?.OrderStatus) <= 2
-                  ? "border-dashed border-gray-300"
-                  : "bg-blue-200"
-              }`}
+              className={`flex-1 h-1 sm:mx-2 ${Number(salesOrderDetails?.OrderStatus) <= 2
+                ? "border-dashed border-gray-300"
+                : "bg-blue-200"
+                }`}
             ></div>
             <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${
-                  Number(salesOrderDetails?.OrderStatus) == 3
-                    ? "bg-yellow-100 border-b-4 border-blue-500"
-                    : Number(salesOrderDetails?.OrderStatus) < 3
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${Number(salesOrderDetails?.OrderStatus) == 3
+                  ? "bg-yellow-100 border-b-4 border-blue-500"
+                  : Number(salesOrderDetails?.OrderStatus) < 3
                     ? "border-gray-300"
                     : "bg-blue-100"
-                }`}
+                  }`}
               >
                 <img
                   src={`${baseurl}/public/images/orderbot/order_assigned.png`}
@@ -332,21 +356,19 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
               </div>
             </div>
             <div
-              className={`flex-1 h-1 sm:mx-2 ${
-                Number(salesOrderDetails?.OrderStatus) <= 3
-                  ? "border-dashed border-gray-300"
-                  : "bg-blue-200"
-              }`}
+              className={`flex-1 h-1 sm:mx-2 ${Number(salesOrderDetails?.OrderStatus) <= 3
+                ? "border-dashed border-gray-300"
+                : "bg-blue-200"
+                }`}
             ></div>
             <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${
-                  Number(salesOrderDetails?.OrderStatus) == 4
-                    ? "bg-yellow-100 border-b-4 border-blue-500"
-                    : Number(salesOrderDetails?.OrderStatus) < 4
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${Number(salesOrderDetails?.OrderStatus) == 4
+                  ? "bg-yellow-100 border-b-4 border-blue-500"
+                  : Number(salesOrderDetails?.OrderStatus) < 4
                     ? "border-gray-300"
                     : "bg-blue-100"
-                }`}
+                  }`}
               >
                 <img
                   src={`${baseurl}/public/images/orderbot/order_out_for_delivery.png`}
@@ -356,21 +378,19 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
               </div>
             </div>
             <div
-              className={`flex-1 h-1 sm:mx-2 ${
-                Number(salesOrderDetails?.OrderStatus) <= 4
-                  ? "border-dashed border-gray-300"
-                  : "bg-blue-200"
+              className={`flex-1 h-1 sm:mx-2 ${Number(salesOrderDetails?.OrderStatus) <= 4
+                ? "border-dashed border-gray-300"
+                : "bg-blue-200"
                 }`}
             ></div>
             <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${
-                  Number(salesOrderDetails?.OrderStatus) == 5
-                    ? "bg-yellow-100 border-b-4 border-blue-500"
-                    : Number(salesOrderDetails?.OrderStatus) < 5
+                className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg p-2 ${Number(salesOrderDetails?.OrderStatus) == 5
+                  ? "bg-yellow-100 border-b-4 border-blue-500"
+                  : Number(salesOrderDetails?.OrderStatus) < 5
                     ? "border-gray-300"
                     : "bg-blue-100"
-                }`}
+                  }`}
               >
                 <img
                   src={`${baseurl}/public/images/orderbot/order_delivered.png`}
@@ -480,6 +500,8 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
                   <TableBody>
                     {products.map((element, index) => {
                       const discountAmount = calculateSalesOrderDiscountAmount(element);
+                      const baseAmount = calculateSalesOrderBaseAmount(element);
+
                       return (
                         <TableRow key={index} className="border-b">
                           <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
@@ -494,32 +516,51 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
                           <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
                             {element?.productname || "-"} ({element?.productcode || "-"})
                           </TableCell>
-                          <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
+                          <TableCell className={`px-2 sm:px-4 py-2 text-xs sm:text-sm text-center ${element?.conversion_flg != "2" ? "font-bold" : ""
+                            }`}>
                             {element?.productqty || "-"}
-                            {element?.conversion_flg == "" && element?.unit
+                            {/* comment by umang on 02-09-2025  */}
+                            {/* {element?.conversion_flg == "" && element?.unit
                               ? ` (${element.unit})`
                               : ""}
                             {element?.conversion_flg != "" && element?.primary_unit_name
                               ? ` (${element.primary_unit_name})`
-                              : ""}
+                              : ""} */}
+                            {element?.unit
+                              ? ` (${element.unit})`
+                              : element?.primary_unit_name
+                                ? ` (${element.primary_unit_name})`
+                                : ""}
                           </TableCell>
                           {element?.conversion_flg != "" && (
                             <>
                               <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
                                 {element?.secondary_base_qty || "-"}
                               </TableCell>
-                              <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
+                              <TableCell className={`px-2 sm:px-4 py-2 text-xs sm:text-sm text-center ${element?.conversion_flg == "2" ? "font-bold" : ""
+                                }`}>
                                 {element?.SecQtyTotal || "-"}
-                                {element?.secondary_unit_name ? ` (${element.secondary_unit_name})` : ""}
+
+                                {/* comment by umang on 02-09-2025  */}
+                                {/* {element?.secondary_unit_name ? ` (${element.secondary_unit_name})` : ""} */}
+                                {element?.sec_unit
+                                  ? ` (${element.sec_unit})`
+                                  : element?.secondary_unit_name
+                                    ? ` (${element.secondary_unit_name})`
+                                    : ""}
+
                               </TableCell>
                             </>
                           )}
                           <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
-                            {element?.conversion_flg != "" &&
-                            element.unit_con_mode == "3" &&
-                            element.conversion_flg == "2"
+                            {/* {element?.conversion_flg != "" &&
+                              element.unit_con_mode == "3" &&
+                              element.conversion_flg == "2"
                               ? element?.sec_unit_rate || "-"
-                              : element?.rate || "-"}
+                              : element?.rate || "-"} */}
+
+                            {/* use rate instead of sec_unit_rate as per new requirement for sales order details page */}
+                            {element?.rate || "-"}
                           </TableCell>
                           <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
                             {element?.total_discount || "0"}
@@ -528,7 +569,7 @@ const OrderDetailsDialog = ({ salesorderId, open, onOpenChange }) => {
                             {discountAmount.toFixed(2)}
                           </TableCell>
                           <TableCell className="px-2 sm:px-4 py-2 text-xs sm:text-sm text-center">
-                            {parseFloat(element?.totalrate || "0").toFixed(2)}
+                            {baseAmount.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       );

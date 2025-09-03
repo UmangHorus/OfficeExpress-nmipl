@@ -134,7 +134,7 @@ const OrderTable = () => {
                   size="sm"
                   disabled={true}
                   title="No contact address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -151,7 +151,7 @@ const OrderTable = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#287F71] hover:text-[#1a5c4d]"
+                    className="text-[#287F71] hover:text-[#1a5c4d] pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -163,7 +163,7 @@ const OrderTable = () => {
                   size="sm"
                   disabled={true}
                   title="No followup address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -180,7 +180,7 @@ const OrderTable = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="created-address-icon"
+                    className="created-address-icon pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -274,10 +274,10 @@ const OrderTable = () => {
             status == "A"
               ? "Approved"
               : status == "C"
-              ? "Rejected"
-              : status == "P"
-              ? "Pending"
-              : "N/A";
+                ? "Rejected"
+                : status == "P"
+                  ? "Pending"
+                  : "N/A";
           const badgeStyles = {
             Approved: "bg-[#287F71] text-white",
             Rejected: "bg-[#ec344c] text-white",
@@ -287,9 +287,8 @@ const OrderTable = () => {
           return (
             <div className="text-center">
               <Badge
-                className={`${
-                  badgeStyles[displayStatus] || "bg-gray-500 text-white"
-                }`}
+                className={`${badgeStyles[displayStatus] || "bg-gray-500 text-white"
+                  }`}
               >
                 {displayStatus}
               </Badge>
@@ -377,23 +376,23 @@ const OrderTable = () => {
         (row.getValue("status_flg") === "A"
           ? "Approved"
           : row.getValue("status_flg") === "C"
-          ? "Rejected"
-          : row.getValue("status_flg") === "P"
-          ? "Pending"
-          : "N/A"
+            ? "Rejected"
+            : row.getValue("status_flg") === "P"
+              ? "Pending"
+              : "N/A"
         )
           .toLowerCase()
           .includes(search) ||
         (row.getValue("create_from") === "OE" ||
-        row.getValue("create_from") === "officeexpre"
+          row.getValue("create_from") === "officeexpre"
           ? "Office Express"
           : row.getValue("create_from") === "NP"
-          ? "E-Commerce"
-          : row.getValue("create_from") === "" ||
-            row.getValue("create_from") === null ||
-            row.getValue("create_from").includes("salesorder_")
-          ? "H-Office"
-          : row.getValue("create_from") || "N/A"
+            ? "E-Commerce"
+            : row.getValue("create_from") === "" ||
+              row.getValue("create_from") === null ||
+              row.getValue("create_from").includes("salesorder_")
+              ? "H-Office"
+              : row.getValue("create_from") || "N/A"
         )
           .toLowerCase()
           .includes(search) ||
@@ -449,22 +448,22 @@ const OrderTable = () => {
         order.status_flg == "A"
           ? "Approved"
           : order.status_flg == "C"
-          ? "Rejected"
-          : order.status_flg == "P"
-          ? "Pending"
-          : "N/A";
+            ? "Rejected"
+            : order.status_flg == "P"
+              ? "Pending"
+              : "N/A";
 
       // Source display logic
       const displaySource =
         order.create_from === "OE" || order.create_from === "officeexpre"
           ? "Office Express"
           : order.create_from === "NP"
-          ? "E-Commerce"
-          : order.create_from === "" ||
-            order.create_from === null ||
-            (order.create_from && order.create_from.includes("salesorder_"))
-          ? "H-Office"
-          : order.create_from || "N/A";
+            ? "E-Commerce"
+            : order.create_from === "" ||
+              order.create_from === null ||
+              (order.create_from && order.create_from.includes("salesorder_"))
+              ? "H-Office"
+              : order.create_from || "N/A";
 
       return [
         escapeCsv(order.customer_address),
@@ -576,9 +575,9 @@ const OrderTable = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -644,13 +643,21 @@ const OrderTable = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm text-muted-foreground">
+          {/* <div className="text-sm text-muted-foreground">
             {pagination.pageIndex * pagination.pageSize + 1}-
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
               data.length
             )}{" "}
             of {data.length} rows
+          </div> */}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length === 0
+              ? "0-0 of 0 rows"
+              : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )} of ${table.getFilteredRowModel().rows.length} rows`}
           </div>
           <div className="flex pagination-buttons gap-2">
             <Button

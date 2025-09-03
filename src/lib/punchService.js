@@ -16,6 +16,7 @@ const getLocationPayload = async (actionType) => {
     }
 
     const location = await getCurrentLocation();
+
     return {
       ...(location?.gmapLink && {
         [`${actionType}_gmapurl`]: location.gmapLink,

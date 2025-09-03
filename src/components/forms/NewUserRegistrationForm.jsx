@@ -44,12 +44,13 @@ import MapWithAutocomplete from "@/components/maps/MapWithAutocomplete";
 import { CompanySearch } from "../inputs/search";
 
 const NewUserRegistrationForm = ({ mobile, onCancel }) => {
-  const { token, appConfig, login,otpData } = useLoginStore();
+  const { token, appConfig, login, otpData } = useLoginStore();
   const { countries, titles, setLoading, setError } = useBasicSettingsStore();
   //   const { companyBranchDivisionData } = useSharedDataStore();
   const [companyList, setCompanyList] = useState([]);
   const [stateList, setStateList] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
+  const [inputValue, setInputValue] = useState("");
   const [isContactModalOpen, setIsContactModalOpen] = useState(true);
   const [pendingContactDetails, setPendingContactDetails] = useState(null);
   const router = useRouter();
@@ -127,6 +128,32 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
     }
   }, [companyData]);
 
+  // useEffect(() => {
+  //   if (companyData) {
+  //     const responseData = Array.isArray(companyData)
+  //       ? companyData[0]
+  //       : companyData;
+  //     if (
+  //       responseData?.STATUS == "SUCCESS" &&
+  //       Array.isArray(responseData?.DATA?.contacts)
+  //     ) {
+  //       setCompanyList(responseData.DATA.contacts);
+  //       if (contact && contact.name.includes("(RC)")) {
+  //         const company = responseData.DATA.contacts.find(
+  //           (c) => c.title === contact.name.split(" (")[0]
+  //         );
+  //         if (company) {
+  //           setSelectedCompany(company);
+  //           setInputValue(company.title);
+  //         }
+  //       }
+  //     } else {
+  //       console.error(responseData?.MSG || "Invalid contact response data");
+  //       setCompanyList([]);
+  //     }
+  //   }
+  // }, [companyData, contact]);
+
   useEffect(() => {
     if (stateData) {
       form.setValue("state", "", { shouldValidate: true });
@@ -156,13 +183,13 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
   }, [stateData, form]);
 
   const addContactMutation = useMutation({
-    mutationFn: async ({ data, selectedcompany }) => {
+    mutationFn: async ({ data, selectedcompany, inputvalue }) => {
       const contactData = {
         country: data.country,
         state: data.state,
         contact_title: data.title,
         name: data.name,
-        company_name: selectedcompany ? selectedcompany.title : "",
+        company_name: selectedcompany ? selectedcompany.title : inputvalue,
         email: data.Email,
         mobile: data.mobile,
         address1: data.address,
@@ -183,15 +210,12 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
         // Store the token in state/local storage if needed for registration
         const isProduction = process.env.NODE_ENV === "production";
         const cookieExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        document.cookie = `token=${token}; path=/; expires=${cookieExpiry.toUTCString()}${
-          isProduction ? "; secure; sameSite=strict" : ""
-        }`;
+        document.cookie = `token=${token}; path=/; expires=${cookieExpiry.toUTCString()}${isProduction ? "; secure; sameSite=strict" : ""
+          }`;
         // Set isEmployee cookie
-        document.cookie = `isEmployee=${
-          otpData.isEmployee ? "true" : "false"
-        }; path=/; expires=${cookieExpiry.toUTCString()}${
-          isProduction ? "; secure; sameSite=strict" : ""
-        }`;
+        document.cookie = `isEmployee=${otpData.isEmployee ? "true" : "false"
+          }; path=/; expires=${cookieExpiry.toUTCString()}${isProduction ? "; secure; sameSite=strict" : ""
+          }`;
 
         // Perform login with CONTACT_DETAILS
         // Only update the specific user fields
@@ -204,12 +228,12 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
             object_name: responseData.CONTACT_DETAILS.contact_name,
           },
         }));
-       // Determine redirect path based on user type
+        // Determine redirect path based on user type
         const redirectPath = otpData.isEmployee ? "/dashboard" : "/leads";
         router.push(redirectPath);
-        toast.success("Contact added successfully!",{
-            duration: 2000,
-          });
+        toast.success("Contact added successfully!", {
+          duration: 2000,
+        });
       } else {
         throw new Error(responseData?.MSG || "Failed to add contact");
       }
@@ -224,7 +248,11 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
   });
 
   const handleContactFormSubmit = (data) => {
-    addContactMutation.mutate({ data, selectedcompany: selectedCompany });
+    addContactMutation.mutate({
+      data,
+      selectedcompany: selectedCompany,
+      inputvalue: inputValue
+    });
   };
 
   const handleMobileInput = async (e) => {
@@ -271,6 +299,14 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
 
   const companySelect = (contact) => {
     setSelectedCompany(contact);
+    setInputValue(contact ? contact.title : "");
+  };
+
+  const handleInputChange = (value) => {
+    setInputValue(value);
+    if (!value) {
+      setSelectedCompany(null);
+    }
   };
 
   const selectedTitleId = form.watch("title");
@@ -362,10 +398,17 @@ const NewUserRegistrationForm = ({ mobile, onCancel }) => {
                         Company
                       </Label>
                       <FormControl>
-                        <CompanySearch
+                        {/* <CompanySearch
                           contacts={companyList}
                           onSelect={companySelect}
                           productSearch={false}
+                        /> */}
+                        <CompanySearch
+                          contacts={companyList}
+                          onSelect={companySelect}
+                          onInputChange={handleInputChange}
+                          productSearch={false}
+                          selectedItem={selectedCompany}
                         />
                       </FormControl>
                     </div>

@@ -301,7 +301,7 @@ const ContactFollowupForm = ({
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Contact Field */}
               <div>
                 <Label htmlFor="contact" className="text-sm font-medium">
@@ -496,7 +496,7 @@ const ContactFollowupForm = ({
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 p-4">
+            <div className="flex justify-end gap-2 py-4 pl-4">
               <Button
                 variant="outline"
                 onClick={onClose}

@@ -71,7 +71,7 @@ const AttendanceReport = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchTrigger, setSearchTrigger] = useState(0);
   const isAdmin = appConfig?.main_admin_flg || "N";
-    // const isAdmin = appConfig?.isAdmin == 1 ? "Y" : "N" || "N";
+  // const isAdmin = appConfig?.isAdmin == 1 ? "Y" : "N" || "N";
   // 3. Update your searchParams state (if not already done)
   const [searchParams, setSearchParams] = useState({
     employeeId: loggedInUserId || "",
@@ -411,7 +411,7 @@ const AttendanceReport = () => {
                   size="sm"
                   disabled={true}
                   title="No punch-in address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-5 w-5 text-gray-500 stroke-2" />
                 </Button>
@@ -421,7 +421,7 @@ const AttendanceReport = () => {
                   size="sm"
                   asChild
                   title={`Punch In Address: ${PunchInAddress}`}
-                  className="hover:bg-blue-50"
+                  className="hover:bg-blue-50 pr-0"
                 >
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -429,6 +429,7 @@ const AttendanceReport = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="pr-0"
                   >
                     <MapPin className="h-5 w-5 text-blue-600 stroke-blue-600" />
                   </a>
@@ -442,7 +443,7 @@ const AttendanceReport = () => {
                   size="sm"
                   disabled={true}
                   title="No punch-out address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-5 w-5 text-gray-500 stroke-2" />
                 </Button>
@@ -452,7 +453,7 @@ const AttendanceReport = () => {
                   size="sm"
                   asChild
                   title={`Punch Out Address: ${PunchOutAddress}`}
-                  className="hover:bg-red-50"
+                  className="hover:bg-red-50 pr-0"
                 >
                   <a
                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -460,6 +461,7 @@ const AttendanceReport = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="pr-0"
                   >
                     <MapPin className="h-5 w-5 text-orange-600 stroke-orange-600" />
                   </a>
@@ -756,9 +758,9 @@ const AttendanceReport = () => {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -827,13 +829,21 @@ const AttendanceReport = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-muted-foreground">
+            {/* <div className="text-sm text-muted-foreground">
               {pagination.pageIndex * pagination.pageSize + 1}-
               {Math.min(
                 (pagination.pageIndex + 1) * pagination.pageSize,
                 data.length
               )}{" "}
               of {data.length} rows
+            </div> */}
+            <div className="text-sm text-muted-foreground">
+              {table.getFilteredRowModel().rows.length === 0
+                ? "0-0 of 0 rows"
+                : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                  (pagination.pageIndex + 1) * pagination.pageSize,
+                  table.getFilteredRowModel().rows.length
+                )} of ${table.getFilteredRowModel().rows.length} rows`}
             </div>
             <div className="flex pagination-buttons gap-2">
               <Button

@@ -131,9 +131,7 @@ const ProductSelectionTable = ({
 
         const newRate = priceList?.priceINR || item.rate;
         const newSecUnitRate = isSecondaryRate
-          ? (
-              parseFloat(newRate) / (parseFloat(item.secondary_base_qty) || 1)
-            ).toFixed(2)
+          ? parseFloat(newRate).toFixed(2)
           : item.sec_unit_rate;
 
         const updatedItem = {
@@ -248,104 +246,243 @@ const ProductSelectionTable = ({
     });
   };
 
-  const getInitialFormValues = (
-    selectedtypeOption,
-    secUnitConfig,
-    product = null
-  ) => {
+  // comment by umang on 02-09-2025 
+  // const getInitialFormValues = (
+  //   selectedtypeOption,
+  //   secUnitConfig,
+  //   product = null
+  // ) => {
+  //   let discount = product?.total_discount || "";
+  //   let discount_amount = "";
+  //   if (product?.total_discount && parseFloat(product.total_discount) > 0) {
+  //     let baseAmount = 0;
+  //     if (product?.conversion_flg != "") {
+  //       if (product.unit_con_mode == "1" && product.conversion_flg == "1") {
+  //         baseAmount =
+  //           parseFloat(product.productqty || "0") *
+  //           parseFloat(product.rate || "0");
+  //       } else if (
+  //         product.unit_con_mode == "1" &&
+  //         product.conversion_flg == "2"
+  //       ) {
+  //         baseAmount =
+  //           (parseFloat(product.SecQtyTotal || "0") *
+  //             parseFloat(product.rate || "0")) /
+  //           parseFloat(product.secondary_base_qty || "1");
+  //       } else if (
+  //         product.unit_con_mode == "3" &&
+  //         product.conversion_flg == "2"
+  //       ) {
+  //         baseAmount =
+  //           parseFloat(product.SecQtyTotal || "0") *
+  //           parseFloat(product.sec_unit_rate || "0");
+  //       } else {
+  //         baseAmount =
+  //           parseFloat(product.productqty || "0") *
+  //           parseFloat(product.rate || "0");
+  //       }
+  //     } else {
+  //       baseAmount =
+  //         parseFloat(product.productqty || "0") *
+  //         parseFloat(product.rate || "0");
+  //     }
+  //     discount_amount = (
+  //       baseAmount *
+  //       (parseFloat(product.total_discount || "0") / 100)
+  //     ).toFixed(2);
+  //   }
+
+  //   const baseFormValues = {
+  //     unique_id: product?.unique_id || generateUniqueId(), // Ensure unique_id is always set
+  //     productid: product?.productid || "",
+  //     productname: product?.productname || "",
+  //     sop_id: product?.sop_id || "",
+  //     stock: product?.current_stock || "",
+  //     rate: product?.rate || "",
+  //     mrp_price: product?.mrp_price || "",
+  //     sec_unit_mrp_rate: product?.sec_unit_mrp_rate || "",
+  //     product_image: product?.product_image || "",
+  //     secondary_base_qty: product?.secondary_base_qty || "0",
+  //     productcode: product?.productcode || "",
+  //     SecQtyReverseCalculate: product?.SecQtyReverseCalculate || "0",
+  //     stock_data: product?.stock_data || [],
+  //     // pricelist_data: product?.pricelist_data || {},
+  //     price_list_flg: product?.price_list_flg || false, // Added price_list_flg
+  //     Attribute_data: product?.Attribute_data || {},
+  //     attribute: {},
+  //     proddivision: product?.proddivision || "",
+  //     unit_con_mode: product?.unit_con_mode || null,
+  //     sec_unit_rate: product?.sec_unit_rate || "0",
+  //     discount: discount,
+  //     discount_amount: discount_amount,
+  //     totalrate: product?.totalrate
+  //       ? (
+  //         parseFloat(product.totalrate) - parseFloat(discount_amount)
+  //       ).toString()
+  //       : "0.00",
+  //     scheduleDate: product?.scheduleDate
+  //       ? formatDateForInput(product.scheduleDate)
+  //       : format(new Date(), "yyyy-MM-dd"),
+  //     ...(selectedtypeOption == "lead-option" ||
+  //       (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
+  //       ? {
+  //         unit: product?.unit || "",
+  //         sec_unit: product?.sec_unit || "",
+  //         unitvalue: product?.unitvalue || "0",
+  //         productqty: product?.productqty || "",
+  //       }
+  //       : {}),
+  //     ...(selectedtypeOption == "salesorder-option" && secUnitConfig == "1"
+  //       ? {
+  //         primary_unit_id: product?.primary_unit_id || "",
+  //         secondary_unit_id: product?.secondary_unit_id || "",
+  //         conversion_flg: product?.conversion_flg || "1",
+  //         SecQtyTotal: product?.SecQtyTotal || "",
+  //         productqty: product?.productqty || "",
+  //       }
+  //       : {}),
+  //   };
+
+  //   return product
+  //     ? baseFormValues
+  //     : [{ ...baseFormValues, unique_id: generateUniqueId() }];
+  // };
+
+  const getInitialFormValues = (selectedtypeOption, secUnitConfig, product = null) => {
     let discount = product?.total_discount || "";
     let discount_amount = "";
-    if (product?.total_discount && parseFloat(product.total_discount) > 0) {
-      let baseAmount = 0;
-      if (product?.conversion_flg != "") {
-        if (product.unit_con_mode == "1" && product.conversion_flg == "1") {
-          baseAmount =
-            parseFloat(product.productqty || "0") *
-            parseFloat(product.rate || "0");
-        } else if (
-          product.unit_con_mode == "1" &&
-          product.conversion_flg == "2"
-        ) {
-          baseAmount =
-            (parseFloat(product.SecQtyTotal || "0") *
-              parseFloat(product.rate || "0")) /
-            parseFloat(product.secondary_base_qty || "1");
-        } else if (
-          product.unit_con_mode == "3" &&
-          product.conversion_flg == "2"
-        ) {
-          baseAmount =
-            parseFloat(product.SecQtyTotal || "0") *
-            parseFloat(product.sec_unit_rate || "0");
-        } else {
-          baseAmount =
-            parseFloat(product.productqty || "0") *
-            parseFloat(product.rate || "0");
+    let subtotal = 0;
+    let calcSubtotal = 0;
+    let totalrate = "0.00";
+
+    // Initialize variables for calculations
+    let primaryQty = parseFloat(product?.productqty) || 0;
+    let rate = parseFloat(product?.rate) || 0;
+
+    // Use product?.rate instead of product?.sec_unit_rate when orderIdParam is present
+    let secUnitRate = orderIdParam
+      ? parseFloat(product?.rate) || 0
+      : parseFloat(product?.sec_unit_rate) || 0;
+
+    let secondaryQty = parseFloat(product?.SecQtyTotal) || 0;
+    const convFact = parseFloat(product?.secondary_base_qty) || 0;
+    const conversionFlg = product?.conversion_flg || "1";
+    const unitConMode = product?.unit_con_mode || "1";
+    // Calculate subtotal and discount_amount based on handleChange logic
+    if (
+      selectedtypeOption == "lead-option" ||
+      (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
+    ) {
+      if (secUnitConfig == "0" || product?.unitvalue == "0") {
+        subtotal = primaryQty * rate;
+        if (discount !== "" && parseFloat(discount) > 0) {
+          discount_amount = ((subtotal * parseFloat(discount)) / 100).toFixed(2);
+        } else if (product?.discount_amount && parseFloat(product.discount_amount) > 0) {
+          discount_amount = parseFloat(product.discount_amount).toFixed(2);
+          discount =
+            subtotal > 0
+              ? ((parseFloat(discount_amount) / subtotal) * 100).toFixed(2)
+              : "";
         }
+        totalrate = (subtotal - (parseFloat(discount_amount) || 0)).toFixed(2);
       } else {
-        baseAmount =
-          parseFloat(product.productqty || "0") *
-          parseFloat(product.rate || "0");
+        const newvalue = convFact > 0 && primaryQty > 0 ? primaryQty / convFact : 0;
+        const adjustedSubtotal = newvalue * rate;
+        if (discount !== "" && parseFloat(discount) > 0) {
+          discount_amount = ((adjustedSubtotal * parseFloat(discount)) / 100).toFixed(2);
+        } else if (product?.discount_amount && parseFloat(product.discount_amount) > 0) {
+          discount_amount = parseFloat(product.discount_amount).toFixed(2);
+          discount =
+            adjustedSubtotal > 0
+              ? ((parseFloat(discount_amount) / adjustedSubtotal) * 100).toFixed(2)
+              : "";
+        }
+        totalrate = (adjustedSubtotal - (parseFloat(discount_amount) || 0)).toFixed(2);
       }
-      discount_amount = (
-        baseAmount *
-        (parseFloat(product.total_discount || "0") / 100)
-      ).toFixed(2);
+    } else if (selectedtypeOption == "salesorder-option" && secUnitConfig == "1") {
+      if (conversionFlg == "1") {
+        secondaryQty =
+          convFact > 0 && primaryQty > 0 ? (primaryQty * convFact).toFixed(2) : "0";
+      } else if (conversionFlg == "2") {
+        primaryQty =
+          convFact > 0 && secondaryQty > 0 ? (secondaryQty / convFact).toFixed(2) : "0";
+      }
+
+      if (unitConMode == "3" && conversionFlg == "2") {
+        calcSubtotal = secondaryQty * secUnitRate;
+      } else {
+        calcSubtotal =
+          conversionFlg == "2" && unitConMode != "3"
+            ? secondaryQty * (rate / convFact)
+            : primaryQty * rate;
+      }
+
+      if (discount !== "" && parseFloat(discount) > 0) {
+        discount_amount = ((calcSubtotal * parseFloat(discount)) / 100).toFixed(2);
+      } else if (product?.discount_amount && parseFloat(product.discount_amount) > 0) {
+        discount_amount = parseFloat(product.discount_amount).toFixed(2);
+        discount =
+          calcSubtotal > 0
+            ? ((parseFloat(discount_amount) / calcSubtotal) * 100).toFixed(2)
+            : "";
+      }
+      totalrate = (calcSubtotal - (parseFloat(discount_amount) || 0)).toFixed(2);
     }
 
     const baseFormValues = {
-      unique_id: product?.unique_id || generateUniqueId(), // Ensure unique_id is always set
+      unique_id: product?.unique_id || generateUniqueId(),
       productid: product?.productid || "",
       productname: product?.productname || "",
       sop_id: product?.sop_id || "",
       stock: product?.current_stock || "",
       rate: product?.rate || "",
       mrp_price: product?.mrp_price || "",
+      sec_unit_mrp_rate: product?.sec_unit_mrp_rate || "",
       product_image: product?.product_image || "",
       secondary_base_qty: product?.secondary_base_qty || "0",
       productcode: product?.productcode || "",
       SecQtyReverseCalculate: product?.SecQtyReverseCalculate || "0",
       stock_data: product?.stock_data || [],
-      // pricelist_data: product?.pricelist_data || {},
-      price_list_flg: product?.price_list_flg || false, // Added price_list_flg
+      price_list_flg: product?.price_list_flg || false,
       Attribute_data: product?.Attribute_data || {},
       attribute: {},
       proddivision: product?.proddivision || "",
       unit_con_mode: product?.unit_con_mode || null,
-      sec_unit_rate: product?.sec_unit_rate || "0",
+      
+      // Use product?.rate instead of product?.sec_unit_rate when orderIdParam is present
+      sec_unit_rate: orderIdParam
+        ? product?.rate || "0"
+        : product?.sec_unit_rate || "0",
+
       discount: discount,
       discount_amount: discount_amount,
-      totalrate: product?.totalrate
-        ? (
-            parseFloat(product.totalrate) - parseFloat(discount_amount)
-          ).toString()
-        : "0.00",
+      totalrate: totalrate,
       scheduleDate: product?.scheduleDate
         ? formatDateForInput(product.scheduleDate)
         : format(new Date(), "yyyy-MM-dd"),
       ...(selectedtypeOption == "lead-option" ||
-      (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
+        (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
         ? {
-            unit: product?.unit || "",
-            sec_unit: product?.sec_unit || "",
-            unitvalue: product?.unitvalue || "0",
-            productqty: product?.productqty || "",
-          }
+          unit: product?.unit || "",
+          sec_unit: product?.sec_unit || "",
+          unitvalue: product?.unitvalue || "0",
+          productqty: product?.productqty || "",
+        }
         : {}),
       ...(selectedtypeOption == "salesorder-option" && secUnitConfig == "1"
         ? {
-            primary_unit_id: product?.primary_unit_id || "",
-            secondary_unit_id: product?.secondary_unit_id || "",
-            conversion_flg: product?.conversion_flg || "1",
-            SecQtyTotal: product?.SecQtyTotal || "",
-            productqty: product?.productqty || "",
-          }
+          primary_unit_id: product?.primary_unit_id || "",
+          secondary_unit_id: product?.secondary_unit_id || "",
+          unit: product?.unit || "",
+          sec_unit: product?.sec_unit || "",
+          conversion_flg: product?.conversion_flg || "1",
+          SecQtyTotal: product?.SecQtyTotal || secondaryQty || "",
+          productqty: product?.productqty || primaryQty || "",
+        }
         : {}),
     };
 
-    return product
-      ? baseFormValues
-      : [{ ...baseFormValues, unique_id: generateUniqueId() }];
+    return product ? baseFormValues : [{ ...baseFormValues, unique_id: generateUniqueId() }];
   };
 
   useEffect(() => {
@@ -456,6 +593,7 @@ const ProductSelectionTable = ({
       stock: "",
       rate: "",
       mrp_price: "",
+      sec_unit_mrp_rate: "",
       product_image: "",
       secondary_base_qty: "0",
       productcode: "",
@@ -472,22 +610,22 @@ const ProductSelectionTable = ({
       discount_amount: "",
       totalrate: "0.00",
       ...(selectedtypeOption == "lead-option" ||
-      (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
+        (selectedtypeOption == "salesorder-option" && secUnitConfig == "0")
         ? {
-            unit: "",
-            sec_unit: "",
-            unitvalue: "0",
-            productqty: "",
-          }
+          unit: "",
+          sec_unit: "",
+          unitvalue: "0",
+          productqty: "",
+        }
         : {}),
       ...(selectedtypeOption == "salesorder-option" && secUnitConfig == "1"
         ? {
-            primary_unit_id: "",
-            secondary_unit_id: "",
-            conversion_flg: "1",
-            SecQtyTotal: "",
-            productqty: "",
-          }
+          primary_unit_id: "",
+          secondary_unit_id: "",
+          conversion_flg: "1",
+          SecQtyTotal: "",
+          productqty: "",
+        }
         : {}),
     };
     return newFormValues;
@@ -528,6 +666,7 @@ const ProductSelectionTable = ({
         newFormValues[index]["stock"] = productData?.current_stock ?? "";
         newFormValues[index]["rate"] = productData?.productrate ?? "";
         newFormValues[index]["mrp_price"] = productData?.mrp_price ?? "";
+        newFormValues[index]["sec_unit_mrp_rate"] = productData?.sec_unit_mrp_rate ?? "";
         newFormValues[index]["product_image"] =
           productData?.product_image ?? "";
         newFormValues[index]["secondary_base_qty"] =
@@ -958,6 +1097,7 @@ const ProductSelectionTable = ({
       discount: "",
       discount_amount: "",
       mrp_price: "",
+      sec_unit_mrp_rate: "",
       unit_con_mode: null,
       sec_unit_rate: "0",
     };
@@ -1035,6 +1175,7 @@ const ProductSelectionTable = ({
         discount: "",
         discount_amount: "",
         mrp_price: "",
+        sec_unit_mrp_rate: "",
         unit_con_mode: null,
         sec_unit_rate: "0",
       };
@@ -1115,15 +1256,15 @@ const ProductSelectionTable = ({
               )}
               {(selectedtypeOption == "lead-option" ||
                 secUnitConfig == "0") && (
-                <>
-                  <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
-                    Unit
-                  </TableHead>
-                  <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
-                    Qty
-                  </TableHead>
-                </>
-              )}
+                  <>
+                    <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
+                      Unit
+                    </TableHead>
+                    <TableHead className="text-white text-sm sm:text-base px-2 sm:px-4 py-2">
+                      Qty
+                    </TableHead>
+                  </>
+                )}
               {selectedtypeOption == "salesorder-option" &&
                 secUnitConfig == "1" && (
                   <>
@@ -1173,11 +1314,10 @@ const ProductSelectionTable = ({
                 <TableCell className="text-left">
                   <div className="">
                     <Trash2
-                      className={`h-8 w-8 sm:h-9 sm:w-9 p-2 rounded-full ${
-                        formValues.length === 1 && !element.productid
-                          ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                          : "text-red-500 hover:bg-red-100 cursor-pointer"
-                      }`}
+                      className={`h-8 w-8 sm:h-9 sm:w-9 p-2 rounded-full ${formValues.length === 1 && !element.productid
+                        ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                        : "text-red-500 hover:bg-red-100 cursor-pointer"
+                        }`}
                       onClick={() => {
                         if (formValues.length > 1 || element.productid) {
                           removeFormFields(index);
@@ -1190,12 +1330,11 @@ const ProductSelectionTable = ({
                   <TableCell className="text-left">
                     <div className="flex justify-center items-center">
                       <Tag
-                        className={`${
-                          element.productid &&
+                        className={`${element.productid &&
                           Object.keys(element.Attribute_data || {}).length > 0
-                            ? "text-[#26994e] cursor-pointer rotate-90"
-                            : "text-gray-400 cursor-not-allowed opacity-50 rotate-90"
-                        }`}
+                          ? "text-[#26994e] cursor-pointer rotate-90"
+                          : "text-gray-400 cursor-not-allowed opacity-50 rotate-90"
+                          }`}
                         size={22}
                         onClick={() => {
                           if (
@@ -1217,11 +1356,10 @@ const ProductSelectionTable = ({
                   <TableCell className="text-left">
                     <div className="flex justify-center items-center">
                       <List
-                        className={`${
-                          element.productid && element?.price_list_flg
-                            ? "text-[#26994e] cursor-pointer"
-                            : "text-gray-400 cursor-not-allowed opacity-50"
-                        }`}
+                        className={`${element.productid && element?.price_list_flg
+                          ? "text-[#26994e] cursor-pointer"
+                          : "text-gray-400 cursor-not-allowed opacity-50"
+                          }`}
                         size={22}
                         onClick={() => {
                           if (element.productid && element?.price_list_flg) {
@@ -1247,11 +1385,10 @@ const ProductSelectionTable = ({
                   />
                 </TableCell>
                 <TableCell
-                  className={`text-left ${
-                    user?.isEmployee && !selectedContact
-                      ? "opacity-50 pointer-events-none"
-                      : ""
-                  }`}
+                  className={`text-left ${user?.isEmployee && !selectedContact
+                    ? "opacity-50 pointer-events-none"
+                    : ""
+                    }`}
                 >
                   {element.productid ? (
                     <div className="w-[250px]">
@@ -1270,11 +1407,10 @@ const ProductSelectionTable = ({
                   <TableCell className="text-left">
                     <div className="flex justify-center items-center">
                       <Eye
-                        className={`text-[#26994e] ${
-                          element.productid
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed opacity-50"
-                        }`}
+                        className={`text-[#26994e] ${element.productid
+                          ? "cursor-pointer"
+                          : "cursor-not-allowed opacity-50"
+                          }`}
                         size={22}
                         onClick={() =>
                           element.productid && handleShowStock(element)
@@ -1297,18 +1433,17 @@ const ProductSelectionTable = ({
                         disabled={!element.productid}
                       >
                         <SelectTrigger
-                          className={`input-focus-style w-[100px] ${
-                            !element.productid ? "bg-gray-300" : "bg-white"
-                          }`}
+                          className={`input-focus-style w-[100px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                            }`}
                         >
                           <SelectValue placeholder="Select Conversion" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="1">
                             {element.primary_unit_id &&
-                            unitMaster.find(
-                              (unit) => unit.unit_id == element.primary_unit_id
-                            ) ? (
+                              unitMaster.find(
+                                (unit) => unit.unit_id == element.primary_unit_id
+                              ) ? (
                               <>
                                 {
                                   unitMaster.find(
@@ -1320,11 +1455,10 @@ const ProductSelectionTable = ({
                                   (unit) =>
                                     unit.unit_id == element.primary_unit_id
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_id == element.primary_unit_id
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_id == element.primary_unit_id
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : element.unit &&
@@ -1346,12 +1480,11 @@ const ProductSelectionTable = ({
                                     unit.unit_name.toLowerCase() ==
                                     element.unit.toLowerCase()
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_name.toLowerCase() ==
-                                        element.unit.toLowerCase()
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_name.toLowerCase() ==
+                                      element.unit.toLowerCase()
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : (
@@ -1360,10 +1493,10 @@ const ProductSelectionTable = ({
                           </SelectItem>
                           <SelectItem value="2">
                             {element.secondary_unit_id &&
-                            unitMaster.find(
-                              (unit) =>
-                                unit.unit_id == element.secondary_unit_id
-                            ) ? (
+                              unitMaster.find(
+                                (unit) =>
+                                  unit.unit_id == element.secondary_unit_id
+                              ) ? (
                               <>
                                 {
                                   unitMaster.find(
@@ -1375,12 +1508,11 @@ const ProductSelectionTable = ({
                                   (unit) =>
                                     unit.unit_id == element.secondary_unit_id
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_id ==
-                                        element.secondary_unit_id
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_id ==
+                                      element.secondary_unit_id
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : element.sec_unit &&
@@ -1402,12 +1534,11 @@ const ProductSelectionTable = ({
                                     unit.unit_name.toLowerCase() ==
                                     element.sec_unit.toLowerCase()
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_name.toLowerCase() ==
-                                        element.sec_unit.toLowerCase()
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_name.toLowerCase() ==
+                                      element.sec_unit.toLowerCase()
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : (
@@ -1425,56 +1556,55 @@ const ProductSelectionTable = ({
                 )}
                 {(selectedtypeOption == "lead-option" ||
                   secUnitConfig == "0") && (
-                  <>
-                    <TableCell className="text-left">
-                      <Select
-                        value={element.unitvalue || "0"}
-                        onValueChange={(value) =>
-                          handleChange(index, {
-                            target: { name: "unitvalue", value },
-                          })
-                        }
-                        disabled={!element.productid}
-                      >
-                        <SelectTrigger className="input-focus-style w-[100px]">
-                          <SelectValue placeholder="Select Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {element.unit && (
-                            <SelectItem value="0">{element.unit}</SelectItem>
-                          )}
-                          {element.sec_unit && (
-                            <SelectItem value="1">
-                              {element.sec_unit}
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-left">
-                      <Input
-                        type="text"
-                        className="input-focus-style w-[100px]"
-                        name="productqty"
-                        value={element.productqty || ""}
-                        onChange={(e) => handleChange(index, e)}
-                        onKeyDown={handleKeyDown}
-                        disabled={!element.productid}
-                      />
-                    </TableCell>
-                  </>
-                )}
+                    <>
+                      <TableCell className="text-left">
+                        <Select
+                          value={element.unitvalue || "0"}
+                          onValueChange={(value) =>
+                            handleChange(index, {
+                              target: { name: "unitvalue", value },
+                            })
+                          }
+                          disabled={!element.productid}
+                        >
+                          <SelectTrigger className="input-focus-style w-[100px]">
+                            <SelectValue placeholder="Select Unit" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {element.unit && (
+                              <SelectItem value="0">{element.unit}</SelectItem>
+                            )}
+                            {secUnitConfig == "1" && element.sec_unit && (
+                              <SelectItem value="1">
+                                {element.sec_unit}
+                              </SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-left">
+                        <Input
+                          type="text"
+                          className="input-focus-style w-[100px]"
+                          name="productqty"
+                          value={element.productqty || ""}
+                          onChange={(e) => handleChange(index, e)}
+                          onKeyDown={handleKeyDown}
+                          disabled={!element.productid}
+                        />
+                      </TableCell>
+                    </>
+                  )}
                 {selectedtypeOption == "salesorder-option" &&
                   secUnitConfig == "1" && (
                     <>
                       <TableCell className="text-left">
                         <Input
                           type="text"
-                          className={`input-focus-style w-[80px] ${
-                            !element.productid || element.conversion_flg == "2"
-                              ? "bg-gray-300"
-                              : "bg-white"
-                          }`}
+                          className={`input-focus-style w-[80px] ${!element.productid || element.conversion_flg == "2"
+                            ? "bg-gray-300"
+                            : "bg-white"
+                            }`}
                           name="productqty"
                           value={element.productqty || ""}
                           onChange={(e) => handleChange(index, e)}
@@ -1486,9 +1616,9 @@ const ProductSelectionTable = ({
                       </TableCell>
                       <TableCell className="text-left">
                         {element.primary_unit_id &&
-                        unitMaster.find(
-                          (unit) => unit.unit_id == element.primary_unit_id
-                        ) ? (
+                          unitMaster.find(
+                            (unit) => unit.unit_id == element.primary_unit_id
+                          ) ? (
                           <span className="">
                             {(() => {
                               const selectedUnit = unitMaster.find(
@@ -1537,9 +1667,8 @@ const ProductSelectionTable = ({
                             disabled={!element.productid}
                           >
                             <SelectTrigger
-                              className={`input-focus-style w-[100px] ${
-                                !element.productid ? "bg-gray-300" : "bg-white"
-                              }`}
+                              className={`input-focus-style w-[100px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                                }`}
                             >
                               <SelectValue placeholder="Select Primary Unit" />
                             </SelectTrigger>
@@ -1571,11 +1700,10 @@ const ProductSelectionTable = ({
                       <TableCell className="text-left">
                         <Input
                           type="text"
-                          className={`input-focus-style w-[100px] ${
-                            !element.productid || element.conversion_flg == "1"
-                              ? "bg-gray-300"
-                              : "bg-white"
-                          }`}
+                          className={`input-focus-style w-[100px] ${!element.productid || element.conversion_flg == "1"
+                            ? "bg-gray-300"
+                            : "bg-white"
+                            }`}
                           name="SecQtyTotal"
                           value={element.SecQtyTotal || ""}
                           onChange={(e) => handleChange(index, e)}
@@ -1587,9 +1715,9 @@ const ProductSelectionTable = ({
                       </TableCell>
                       <TableCell className="text-left">
                         {element.secondary_unit_id &&
-                        unitMaster.find(
-                          (unit) => unit.unit_id == element.secondary_unit_id
-                        ) ? (
+                          unitMaster.find(
+                            (unit) => unit.unit_id == element.secondary_unit_id
+                          ) ? (
                           <span className="">
                             {(() => {
                               const selectedUnit = unitMaster.find(
@@ -1638,9 +1766,8 @@ const ProductSelectionTable = ({
                             disabled={!element.productid}
                           >
                             <SelectTrigger
-                              className={`input-focus-style w-[100px] ${
-                                !element.productid ? "bg-gray-300" : "bg-white"
-                              }`}
+                              className={`input-focus-style w-[100px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                                }`}
                             >
                               <SelectValue placeholder="Select Secondary Unit" />
                             </SelectTrigger>
@@ -1662,33 +1789,46 @@ const ProductSelectionTable = ({
                   )}
 
                 <TableCell className="text-left">
-                  <span className="">
+                  {/* <span className="">
                     {!isNaN(parseFloat(element.mrp_price))
                       ? parseFloat(element.mrp_price).toFixed(2)
                       : "0.00"}
+                  </span> */}
+                  <span className="">
+                    {
+                      selectedtypeOption == "salesorder-option" &&
+                        secUnitConfig == "1" &&
+                        element.unit_con_mode == "3" &&
+                        element.conversion_flg == "2"
+                        ? !isNaN(parseFloat(element.sec_unit_mrp_rate))
+                          ? parseFloat(element.sec_unit_mrp_rate).toFixed(2)
+                          : "0.00"
+                        : !isNaN(parseFloat(element.mrp_price))
+                          ? parseFloat(element.mrp_price).toFixed(2)
+                          : "0.00"
+                    }
                   </span>
                 </TableCell>
                 <TableCell className="text-left">
                   <Input
                     type="text"
-                    className={`input-focus-style w-[100px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-[100px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name={
                       selectedtypeOption == "salesorder-option" &&
-                      secUnitConfig == "1" &&
-                      element.unit_con_mode == "3" &&
-                      element.conversion_flg == "2"
+                        secUnitConfig == "1" &&
+                        element.unit_con_mode == "3" &&
+                        element.conversion_flg == "2"
                         ? "sec_unit_rate"
                         : "rate"
                     }
                     value={
                       selectedtypeOption == "salesorder-option" &&
-                      secUnitConfig == "1" &&
-                      element.unit_con_mode == "3" &&
-                      element.conversion_flg == "2"
+                        secUnitConfig == "1" &&
+                        element.unit_con_mode == "3" &&
+                        element.conversion_flg == "2"
                         ? element.sec_unit_rate || ""
                         : element.rate || ""
                     }
@@ -1700,11 +1840,10 @@ const ProductSelectionTable = ({
                 <TableCell className="text-left">
                   <Input
                     type="text"
-                    className={`input-focus-style w-[80px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-[80px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name="discount"
                     value={element.discount || ""}
                     onChange={(e) => handleChange(index, e)}
@@ -1715,11 +1854,10 @@ const ProductSelectionTable = ({
                 <TableCell className="text-left">
                   <Input
                     type="text"
-                    className={`input-focus-style w-[100px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-[100px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name="discount_amount"
                     value={element.discount_amount || ""}
                     onChange={(e) => handleChange(index, e)}
@@ -1762,11 +1900,10 @@ const ProductSelectionTable = ({
             <div className="grid grid-cols-1 gap-4 mb-3">
               <div className="flex justify-end">
                 <Trash2
-                  className={`h-8 w-8 sm:h-9 sm:w-9 p-2 rounded-full ${
-                    formValues.length === 1 && !element.productid
-                      ? "text-gray-400 bg-gray-100 cursor-not-allowed"
-                      : "text-red-500 hover:bg-red-100 cursor-pointer"
-                  }`}
+                  className={`h-8 w-8 sm:h-9 sm:w-9 p-2 rounded-full ${formValues.length === 1 && !element.productid
+                    ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                    : "text-red-500 hover:bg-red-100 cursor-pointer"
+                    }`}
                   onClick={() => {
                     if (formValues.length > 1 || element.productid) {
                       removeFormFields(index);
@@ -1782,12 +1919,11 @@ const ProductSelectionTable = ({
                     </label>
                     <div className="flex items-center">
                       <Tag
-                        className={`${
-                          element.productid &&
+                        className={`${element.productid &&
                           Object.keys(element.Attribute_data || {}).length > 0
-                            ? "text-[#26994e] cursor-pointer rotate-90"
-                            : "text-gray-400 cursor-not-allowed opacity-50 rotate-90"
-                        }`}
+                          ? "text-[#26994e] cursor-pointer rotate-90"
+                          : "text-gray-400 cursor-not-allowed opacity-50 rotate-90"
+                          }`}
                         size={22}
                         onClick={() => {
                           if (
@@ -1812,11 +1948,10 @@ const ProductSelectionTable = ({
                     </label>
                     <div className="flex items-center">
                       <List
-                        className={`${
-                          element.productid && element?.price_list_flg
-                            ? "text-[#26994e] cursor-pointer"
-                            : "text-gray-400 cursor-not-allowed opacity-50"
-                        }`}
+                        className={`${element.productid && element?.price_list_flg
+                          ? "text-[#26994e] cursor-pointer"
+                          : "text-gray-400 cursor-not-allowed opacity-50"
+                          }`}
                         size={22}
                         onClick={() => {
                           if (element.productid && element?.price_list_flg) {
@@ -1846,11 +1981,10 @@ const ProductSelectionTable = ({
                 </div>
 
                 <div
-                  className={`${
-                    user?.isEmployee && !selectedContact
-                      ? "opacity-50 pointer-events-none"
-                      : ""
-                  } ${element.productid ? "flex items-center" : ""}`}
+                  className={`${user?.isEmployee && !selectedContact
+                    ? "opacity-50 pointer-events-none"
+                    : ""
+                    } ${element.productid ? "flex items-center" : ""}`}
                 >
                   <label className="text-sm font-medium text-gray-500 w-32">
                     Product:
@@ -1877,11 +2011,10 @@ const ProductSelectionTable = ({
                     </label>
                     <div className="flex items-center">
                       <Eye
-                        className={`text-[#26994e] ${
-                          element.productid
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed opacity-50"
-                        }`}
+                        className={`text-[#26994e] ${element.productid
+                          ? "cursor-pointer"
+                          : "cursor-not-allowed opacity-50"
+                          }`}
                         size={22}
                         onClick={() =>
                           element.productid && handleShowStock(element)
@@ -1907,18 +2040,17 @@ const ProductSelectionTable = ({
                         disabled={!element.productid}
                       >
                         <SelectTrigger
-                          className={`input-focus-style w-full max-w-[150px] ${
-                            !element.productid ? "bg-gray-300" : "bg-white"
-                          }`}
+                          className={`input-focus-style w-full max-w-[150px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                            }`}
                         >
                           <SelectValue placeholder="Select Conversion" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="1">
                             {element.primary_unit_id &&
-                            unitMaster.find(
-                              (unit) => unit.unit_id == element.primary_unit_id
-                            ) ? (
+                              unitMaster.find(
+                                (unit) => unit.unit_id == element.primary_unit_id
+                              ) ? (
                               <>
                                 {
                                   unitMaster.find(
@@ -1930,11 +2062,10 @@ const ProductSelectionTable = ({
                                   (unit) =>
                                     unit.unit_id == element.primary_unit_id
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_id == element.primary_unit_id
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_id == element.primary_unit_id
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : element.unit &&
@@ -1956,12 +2087,11 @@ const ProductSelectionTable = ({
                                     unit.unit_name.toLowerCase() ==
                                     element.unit.toLowerCase()
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_name.toLowerCase() ==
-                                        element.unit.toLowerCase()
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_name.toLowerCase() ==
+                                      element.unit.toLowerCase()
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : (
@@ -1970,10 +2100,10 @@ const ProductSelectionTable = ({
                           </SelectItem>
                           <SelectItem value="2">
                             {element.secondary_unit_id &&
-                            unitMaster.find(
-                              (unit) =>
-                                unit.unit_id == element.secondary_unit_id
-                            ) ? (
+                              unitMaster.find(
+                                (unit) =>
+                                  unit.unit_id == element.secondary_unit_id
+                              ) ? (
                               <>
                                 {
                                   unitMaster.find(
@@ -1985,12 +2115,11 @@ const ProductSelectionTable = ({
                                   (unit) =>
                                     unit.unit_id == element.secondary_unit_id
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_id ==
-                                        element.secondary_unit_id
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_id ==
+                                      element.secondary_unit_id
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : element.sec_unit &&
@@ -2012,12 +2141,11 @@ const ProductSelectionTable = ({
                                     unit.unit_name.toLowerCase() ==
                                     element.sec_unit.toLowerCase()
                                 ).unit_symbol &&
-                                  ` (${
-                                    unitMaster.find(
-                                      (unit) =>
-                                        unit.unit_name.toLowerCase() ==
-                                        element.sec_unit.toLowerCase()
-                                    ).unit_symbol
+                                  ` (${unitMaster.find(
+                                    (unit) =>
+                                      unit.unit_name.toLowerCase() ==
+                                      element.sec_unit.toLowerCase()
+                                  ).unit_symbol
                                   })`}
                               </>
                             ) : (
@@ -2040,51 +2168,51 @@ const ProductSelectionTable = ({
                 )}
                 {(selectedtypeOption == "lead-option" ||
                   secUnitConfig == "0") && (
-                  <>
-                    <div className="flex items-center">
-                      <label className="text-sm font-medium text-gray-500 w-32">
-                        Unit:
-                      </label>
-                      <Select
-                        value={element.unitvalue || "0"}
-                        onValueChange={(value) =>
-                          handleChange(index, {
-                            target: { name: "unitvalue", value },
-                          })
-                        }
-                        disabled={!element.productid}
-                      >
-                        <SelectTrigger className="input-focus-style w-full max-w-[150px]">
-                          <SelectValue placeholder="Select Unit" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {element.unit && (
-                            <SelectItem value="0">{element.unit}</SelectItem>
-                          )}
-                          {element.sec_unit && (
-                            <SelectItem value="1">
-                              {element.sec_unit}
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center">
-                      <label className="text-sm font-medium text-gray-500 w-32">
-                        Qty:
-                      </label>
-                      <Input
-                        type="text"
-                        className="input-focus-style w-full max-w-[150px]"
-                        name="productqty"
-                        value={element.productqty || ""}
-                        onChange={(e) => handleChange(index, e)}
-                        onKeyDown={handleKeyDown}
-                        disabled={!element.productid}
-                      />
-                    </div>
-                  </>
-                )}
+                    <>
+                      <div className="flex items-center">
+                        <label className="text-sm font-medium text-gray-500 w-32">
+                          Unit:
+                        </label>
+                        <Select
+                          value={element.unitvalue || "0"}
+                          onValueChange={(value) =>
+                            handleChange(index, {
+                              target: { name: "unitvalue", value },
+                            })
+                          }
+                          disabled={!element.productid}
+                        >
+                          <SelectTrigger className="input-focus-style w-full max-w-[150px]">
+                            <SelectValue placeholder="Select Unit" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {element.unit && (
+                              <SelectItem value="0">{element.unit}</SelectItem>
+                            )}
+                            {secUnitConfig == "1" && element.sec_unit && (
+                              <SelectItem value="1">
+                                {element.sec_unit}
+                              </SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center">
+                        <label className="text-sm font-medium text-gray-500 w-32">
+                          Qty:
+                        </label>
+                        <Input
+                          type="text"
+                          className="input-focus-style w-full max-w-[150px]"
+                          name="productqty"
+                          value={element.productqty || ""}
+                          onChange={(e) => handleChange(index, e)}
+                          onKeyDown={handleKeyDown}
+                          disabled={!element.productid}
+                        />
+                      </div>
+                    </>
+                  )}
                 {selectedtypeOption == "salesorder-option" &&
                   secUnitConfig == "1" && (
                     <>
@@ -2094,11 +2222,10 @@ const ProductSelectionTable = ({
                         </label>
                         <Input
                           type="text"
-                          className={`input-focus-style w-full max-w-[150px] ${
-                            !element.productid || element.conversion_flg == "2"
-                              ? "bg-gray-300"
-                              : "bg-white"
-                          }`}
+                          className={`input-focus-style w-full max-w-[150px] ${!element.productid || element.conversion_flg == "2"
+                            ? "bg-gray-300"
+                            : "bg-white"
+                            }`}
                           name="productqty"
                           value={element.productqty || ""}
                           onChange={(e) => handleChange(index, e)}
@@ -2113,9 +2240,9 @@ const ProductSelectionTable = ({
                           Primary Unit:
                         </label>
                         {element.primary_unit_id &&
-                        unitMaster.find(
-                          (unit) => unit.unit_id == element.primary_unit_id
-                        ) ? (
+                          unitMaster.find(
+                            (unit) => unit.unit_id == element.primary_unit_id
+                          ) ? (
                           <span className="text-sm flex-1">
                             {(() => {
                               const selectedUnit = unitMaster.find(
@@ -2164,9 +2291,8 @@ const ProductSelectionTable = ({
                             disabled={!element.productid}
                           >
                             <SelectTrigger
-                              className={`input-focus-style w-full max-w-[150px] ${
-                                !element.productid ? "bg-gray-300" : "bg-white"
-                              }`}
+                              className={`input-focus-style w-full max-w-[150px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                                }`}
                             >
                               <SelectValue placeholder="Select Primary Unit" />
                             </SelectTrigger>
@@ -2204,11 +2330,10 @@ const ProductSelectionTable = ({
                         </label>
                         <Input
                           type="text"
-                          className={`input-focus-style w-full max-w-[150px] ${
-                            !element.productid || element.conversion_flg == "1"
-                              ? "bg-gray-300"
-                              : "bg-white"
-                          }`}
+                          className={`input-focus-style w-full max-w-[150px] ${!element.productid || element.conversion_flg == "1"
+                            ? "bg-gray-300"
+                            : "bg-white"
+                            }`}
                           name="SecQtyTotal"
                           value={element.SecQtyTotal || ""}
                           onChange={(e) => handleChange(index, e)}
@@ -2223,9 +2348,9 @@ const ProductSelectionTable = ({
                           Secondary Unit:
                         </label>
                         {element.secondary_unit_id &&
-                        unitMaster.find(
-                          (unit) => unit.unit_id == element.secondary_unit_id
-                        ) ? (
+                          unitMaster.find(
+                            (unit) => unit.unit_id == element.secondary_unit_id
+                          ) ? (
                           <span className="text-sm flex-1">
                             {(() => {
                               const selectedUnit = unitMaster.find(
@@ -2274,9 +2399,8 @@ const ProductSelectionTable = ({
                             disabled={!element.productid}
                           >
                             <SelectTrigger
-                              className={`input-focus-style w-full max-w-[150px] ${
-                                !element.productid ? "bg-gray-300" : "bg-white"
-                              }`}
+                              className={`input-focus-style w-full max-w-[150px] ${!element.productid ? "bg-gray-300" : "bg-white"
+                                }`}
                             >
                               <SelectValue placeholder="Select Secondary Unit" />
                             </SelectTrigger>
@@ -2302,9 +2426,24 @@ const ProductSelectionTable = ({
                     MRP:
                   </label>
                   <span className="text-sm">
-                    {!isNaN(parseFloat(element.mrp_price))
+                    {/* {!isNaN(parseFloat(element.mrp_price))
                       ? parseFloat(element.mrp_price).toFixed(2)
-                      : "0.00"}
+                      : "0.00"} */}
+
+                    <span className="">
+                      {
+                        selectedtypeOption == "salesorder-option" &&
+                          secUnitConfig == "1" &&
+                          element.unit_con_mode == "3" &&
+                          element.conversion_flg == "2"
+                          ? !isNaN(parseFloat(element.sec_unit_mrp_rate))
+                            ? parseFloat(element.sec_unit_mrp_rate).toFixed(2)
+                            : "0.00"
+                          : !isNaN(parseFloat(element.mrp_price))
+                            ? parseFloat(element.mrp_price).toFixed(2)
+                            : "0.00"
+                      }
+                    </span>
                   </span>
                 </div>
                 <div className="flex items-center">
@@ -2313,24 +2452,23 @@ const ProductSelectionTable = ({
                   </label>
                   <Input
                     type="text"
-                    className={`input-focus-style w-full max-w-[150px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-full max-w-[150px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name={
                       selectedtypeOption == "salesorder-option" &&
-                      secUnitConfig == "1" &&
-                      element.unit_con_mode == "3" &&
-                      element.conversion_flg == "2"
+                        secUnitConfig == "1" &&
+                        element.unit_con_mode == "3" &&
+                        element.conversion_flg == "2"
                         ? "sec_unit_rate"
                         : "rate"
                     }
                     value={
                       selectedtypeOption == "salesorder-option" &&
-                      secUnitConfig == "1" &&
-                      element.unit_con_mode == "3" &&
-                      element.conversion_flg == "2"
+                        secUnitConfig == "1" &&
+                        element.unit_con_mode == "3" &&
+                        element.conversion_flg == "2"
                         ? element.sec_unit_rate || ""
                         : element.rate || ""
                     }
@@ -2345,11 +2483,10 @@ const ProductSelectionTable = ({
                   </label>
                   <Input
                     type="text"
-                    className={`input-focus-style w-full max-w-[150px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-full max-w-[150px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name="discount"
                     value={element.discount || ""}
                     onChange={(e) => handleChange(index, e)}
@@ -2363,11 +2500,10 @@ const ProductSelectionTable = ({
                   </label>
                   <Input
                     type="text"
-                    className={`input-focus-style w-full max-w-[150px] ${
-                      !element.productid || !user?.isEmployee
-                        ? "bg-gray-300"
-                        : "bg-white"
-                    }`}
+                    className={`input-focus-style w-full max-w-[150px] ${!element.productid || !user?.isEmployee
+                      ? "bg-gray-300"
+                      : "bg-white"
+                      }`}
                     name="discount_amount"
                     value={element.discount_amount || ""}
                     onChange={(e) => handleChange(index, e)}

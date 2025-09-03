@@ -653,7 +653,7 @@ const AddFollowupForm = ({ isOpen, onClose, onFollowupSubmit }) => {
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 p-4">
+            <div className="flex justify-end gap-2 py-4 pl-4">
               <Button
                 variant="outline"
                 onClick={onClose}

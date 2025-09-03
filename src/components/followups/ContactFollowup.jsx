@@ -129,9 +129,8 @@ const ContactFollowup = () => {
               id: item.interaction_id,
               contactAddress: item.full_address || "",
               followupAddress: item.gmapAddress || "",
-              contactName: `${item?.contact_name} (${
-                item?.contact_type == "1" ? "C" : "RC"
-              })`,
+              contactName: `${item?.contact_name} (${item?.contact_type == "1" ? "C" : "RC"
+                })`,
               associateName: item.subsubordinate_names || "",
               contactMobile: item.contact_mobile_no || "",
               contactEmail: item.contact_email_address || "",
@@ -152,7 +151,7 @@ const ContactFollowup = () => {
             })
           );
           setData(mappedData);
-          toast.success("Follow-up added successfully.",{
+          toast.success("Follow-up added successfully.", {
             duration: 2000,
           });
           setIsFollowupDialogOpen(false);
@@ -160,8 +159,8 @@ const ContactFollowup = () => {
         } else {
           toast.error(
             responseData?.MSG ||
-              responseData?.message ||
-              "Failed to refresh followup data."
+            responseData?.message ||
+            "Failed to refresh followup data."
           );
         }
       } else {
@@ -234,8 +233,8 @@ const ContactFollowup = () => {
       } else {
         toast.error(
           responseData?.MSG ||
-            responseData?.message ||
-            "Failed to download file"
+          responseData?.message ||
+          "Failed to download file"
         );
       }
     } catch (err) {
@@ -275,9 +274,8 @@ const ContactFollowup = () => {
             id: item.interaction_id,
             contactAddress: item.full_address || "",
             followupAddress: item.gmapAddress || "",
-            contactName: `${item?.contact_name} (${
-              item?.contact_type == "1" ? "C" : "RC"
-            })`,
+            contactName: `${item?.contact_name} (${item?.contact_type == "1" ? "C" : "RC"
+              })`,
             associateName: item.subsubordinate_names || "",
             contactMobile: item.contact_mobile_no || "",
             contactEmail: item.contact_email_address || "",
@@ -306,8 +304,8 @@ const ContactFollowup = () => {
         // );
         console.error(
           responseData?.MSG ||
-            responseData?.message ||
-            "Failed to fetch followup data"
+          responseData?.message ||
+          "Failed to fetch followup data"
         );
       }
     }
@@ -399,9 +397,8 @@ const ContactFollowup = () => {
             id: item.interaction_id,
             contactAddress: item.full_address || "",
             followupAddress: item.gmapAddress || "",
-            contactName: `${item?.contact_name} (${
-              item?.contact_type == "1" ? "C" : "RC"
-            })`,
+            contactName: `${item?.contact_name} (${item?.contact_type == "1" ? "C" : "RC"
+              })`,
             associateName: item.subsubordinate_names || "",
             contactMobile: item.contact_mobile_no || "",
             contactEmail: item.contact_email_address || "",
@@ -425,8 +422,8 @@ const ContactFollowup = () => {
       } else {
         toast.error(
           responseData?.MSG ||
-            responseData?.message ||
-            "Failed to fetch followup data"
+          responseData?.message ||
+          "Failed to fetch followup data"
         );
       }
     } catch (err) {
@@ -489,7 +486,7 @@ const ContactFollowup = () => {
                   handleDownloadInteractionFile(interaction_id, contact_type)
                 }
                 title="Download Interaction File"
-                className="text-[#287F71] hover:text-[#1a5c4d]"
+                className="text-[#287F71] hover:text-[#1a5c4d] pr-0"
               >
                 <Download className="h-4 w-4" />
               </Button>
@@ -499,7 +496,7 @@ const ContactFollowup = () => {
                   size="sm"
                   disabled={true}
                   title="No contact address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -516,7 +513,7 @@ const ContactFollowup = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#287F71] hover:text-[#1a5c4d]"
+                    className="text-[#287F71] hover:text-[#1a5c4d] pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -528,7 +525,7 @@ const ContactFollowup = () => {
                   size="sm"
                   disabled={true}
                   title="No followup address available"
-                  className="cursor-not-allowed"
+                  className="cursor-not-allowed pr-0"
                 >
                   <MapPin className="h-4 w-4 text-gray-400" />
                 </Button>
@@ -545,7 +542,7 @@ const ContactFollowup = () => {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="created-address-icon"
+                    className="created-address-icon pr-0"
                   >
                     <MapPin className="h-4 w-4" />
                   </a>
@@ -818,8 +815,22 @@ const ContactFollowup = () => {
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
       const search = filterValue.toLowerCase();
-      return Object.keys(row.original).some((key) =>
-        String(row.getValue(key)).toLowerCase().includes(search)
+      return (
+        row.getValue("contactName")?.toLowerCase().includes(search) ||
+        row.getValue("associateName")?.toLowerCase().includes(search) ||
+        row.getValue("contactMobile")?.toLowerCase().includes(search) ||
+        row.getValue("contactEmail")?.toLowerCase().includes(search) ||
+        row.getValue("contactCity")?.toLowerCase().includes(search) ||
+        row.getValue("contactRoute")?.toLowerCase().includes(search) ||
+        row.getValue("contactIndustry")?.toLowerCase().includes(search) ||
+        row.getValue("followupType")?.toLowerCase().includes(search) ||
+        row.getValue("followupOutcome")?.toLowerCase().includes(search) ||
+        row.getValue("followupTakenDate")?.toLowerCase().includes(search) ||
+        row.getValue("nextActionDate")?.toLowerCase().includes(search) ||
+        row.getValue("keyAccountManager")?.toLowerCase().includes(search) ||
+        row.getValue("createdDate")?.toLowerCase().includes(search) ||
+        row.getValue("createdBy")?.toLowerCase().includes(search) ||
+        row.getValue("followupDescription")?.toLowerCase().includes(search)
       );
     },
     onPaginationChange: (updater) => {
@@ -895,7 +906,7 @@ const ContactFollowup = () => {
             placeholder="Search followups..."
             value={globalFilter || ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full sm:w-80 bg-white border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#287F71]"
+            className="w-full sm:max-w-sm bg-[#fff]"
           />
           <div className="flex flex-row sm:ml-auto gap-2">
             <DropdownMenu>
@@ -950,9 +961,9 @@ const ContactFollowup = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -1021,14 +1032,23 @@ const ContactFollowup = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm">
+          {/* <div className="text-sm">
             {pagination.pageIndex * pagination.pageSize + 1}-
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
               data.length
             )}{" "}
             of {data.length} rows
+          </div> */}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length === 0
+              ? "0-0 of 0 rows"
+              : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )} of ${table.getFilteredRowModel().rows.length} rows`}
           </div>
+
           <div className="flex pagination-buttons gap-2">
             <Button
               variant="outline"

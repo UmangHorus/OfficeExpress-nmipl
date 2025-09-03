@@ -118,9 +118,8 @@ const LeadFollowup = () => {
             leadId: item.lead_id || "",
             contactAddress: item.full_address || "",
             followupAddress: item.gmapAddress || "",
-            contactName: `${item?.contact_name} (${
-              item?.contact_type == "1" ? "C" : "RC"
-            })`,
+            contactName: `${item?.contact_name} (${item?.contact_type == "1" ? "C" : "RC"
+              })`,
             associateName: item.subsubordinate_names || "",
             contactMobile: item.contact_mobile_no || "",
             contactEmail: item.contact_email_address || "",
@@ -148,8 +147,8 @@ const LeadFollowup = () => {
         //     "Failed to fetch followup data"
         // );
         console.error(responseData?.MSG ||
-            responseData?.message ||
-            "Failed to fetch followup data")
+          responseData?.message ||
+          "Failed to fetch followup data")
       }
     }
     if (error) {
@@ -245,9 +244,8 @@ const LeadFollowup = () => {
             leadId: item.lead_id || "",
             contactAddress: item.full_address || "",
             followupAddress: item.gmapAddress || "",
-            contactName: `${item?.contact_name} (${
-              item?.contact_type == "1" ? "C" : "RC"
-            })`,
+            contactName: `${item?.contact_name} (${item?.contact_type == "1" ? "C" : "RC"
+              })`,
             associateName: item.subsubordinate_names || "",
             contactMobile: item.contact_mobile_no || "",
             contactEmail: item.contact_email_address || "",
@@ -271,8 +269,8 @@ const LeadFollowup = () => {
       } else {
         toast.error(
           responseData?.MSG ||
-            responseData?.message ||
-            "Failed to fetch followup data"
+          responseData?.message ||
+          "Failed to fetch followup data"
         );
       }
     } catch (err) {
@@ -671,8 +669,22 @@ const LeadFollowup = () => {
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnId, filterValue) => {
       const search = filterValue.toLowerCase();
-      return Object.keys(row.original).some((key) =>
-        String(row.getValue(key)).toLowerCase().includes(search)
+      return (
+        row.getValue("leadId")?.toLowerCase().includes(search) ||
+        row.getValue("contactName")?.toLowerCase().includes(search) ||
+        row.getValue("contactMobile")?.toLowerCase().includes(search) ||
+        row.getValue("contactEmail")?.toLowerCase().includes(search) ||
+        row.getValue("contactCity")?.toLowerCase().includes(search) ||
+        row.getValue("contactRoute")?.toLowerCase().includes(search) ||
+        row.getValue("contactIndustry")?.toLowerCase().includes(search) ||
+        row.getValue("followupType")?.toLowerCase().includes(search) ||
+        row.getValue("followupOutcome")?.toLowerCase().includes(search) ||
+        row.getValue("followupTakenDate")?.toLowerCase().includes(search) ||
+        row.getValue("nextActionDate")?.toLowerCase().includes(search) ||
+        row.getValue("keyAccountManager")?.toLowerCase().includes(search) ||
+        row.getValue("createdDate")?.toLowerCase().includes(search) ||
+        row.getValue("createdBy")?.toLowerCase().includes(search) ||
+        row.getValue("followupDescription")?.toLowerCase().includes(search)
       );
     },
     onPaginationChange: (updater) => {
@@ -748,8 +760,7 @@ const LeadFollowup = () => {
             placeholder="Search followups..."
             value={globalFilter || ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full sm:w-80 bg-white border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#287F71]"
-          />
+            className="w-full sm:max-w-sm bg-[#fff]" />
           <div className="flex flex-row sm:ml-auto gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -797,9 +808,9 @@ const LeadFollowup = () => {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -868,13 +879,21 @@ const LeadFollowup = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm text-muted-foreground">
+          {/* <div className="text-sm text-muted-foreground">
             {pagination.pageIndex * pagination.pageSize + 1}-
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
               data.length
             )}{" "}
             of {data.length} rows
+          </div> */}
+          <div className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length === 0
+              ? "0-0 of 0 rows"
+              : `${pagination.pageIndex * pagination.pageSize + 1}-${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                table.getFilteredRowModel().rows.length
+              )} of ${table.getFilteredRowModel().rows.length} rows`}
           </div>
           <div className="flex pagination-buttons gap-2">
             <Button
