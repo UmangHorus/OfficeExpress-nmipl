@@ -20,6 +20,11 @@ const DivisionSelector = ({
   const { companyDetails } = useSharedDataStore();
   const companyDivisions = companyDetails?.company_division || [];
 
+  // Don't render if divisions are not enabled or no options are available
+  if (companyDetails?.is_company_division_enabled != 1) {
+    return null;
+  }
+
   // Set first division as default when available for non-employee
   useEffect(() => {
     if (
@@ -44,11 +49,6 @@ const DivisionSelector = ({
         </div>
       </div>
     );
-  }
-
-  // Don't render if divisions are not enabled or no options are available
-  if (companyDetails?.is_company_division_enabled != 1) {
-    return null;
   }
 
   if (user?.isEmployee && options.length == 0) {
