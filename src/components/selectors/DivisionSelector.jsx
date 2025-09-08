@@ -20,14 +20,10 @@ const DivisionSelector = ({
   const { companyDetails } = useSharedDataStore();
   const companyDivisions = companyDetails?.company_division || [];
 
-  // Don't render if divisions are not enabled or no options are available
-  if (companyDetails?.is_company_division_enabled != 1) {
-    return null;
-  }
-
-  // Set first division as default when available for non-employee
+  // Set first division as default for non-employees when available
   useEffect(() => {
     if (
+      companyDetails?.is_company_division_enabled === 1 &&
       !user?.isEmployee &&
       companyDivisions.length > 0 &&
       !value &&
@@ -35,7 +31,12 @@ const DivisionSelector = ({
     ) {
       onValueChange(companyDivisions[0].div_id);
     }
-  }, [user?.isEmployee, companyDivisions, value, onValueChange, orderIdParam]);
+  }, [user?.isEmployee, companyDivisions, value, onValueChange, orderIdParam, companyDetails]);
+
+  // Don't render if divisions are not enabled
+  if (companyDetails?.is_company_division_enabled !== 1) {
+    return null;
+  }
 
   // If orderIdParam exists, display salesOrderDetails.division_name
   if (orderIdParam && salesOrderDetails?.division_name) {
@@ -51,15 +52,16 @@ const DivisionSelector = ({
     );
   }
 
-  if (user?.isEmployee && options.length == 0) {
+  // Don't render if no options are available for employees or no divisions for non-employees
+  if (user?.isEmployee && options.length === 0) {
     return null;
   }
 
-  if (!user?.isEmployee && companyDivisions.length == 0) {
+  if (!user?.isEmployee && companyDivisions.length === 0) {
     return null;
   }
 
-  // Default behavior for non-employees
+  // Render for non-employees
   if (!user?.isEmployee) {
     return (
       <div className="space-y-2">
@@ -85,7 +87,7 @@ const DivisionSelector = ({
     );
   }
 
-  // Default behavior for employees
+  // Render for employees
   return (
     <div className="space-y-2">
       <label className="block text-base font-medium text-[#4a5a6b]">
